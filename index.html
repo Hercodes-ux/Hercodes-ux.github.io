@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harshini | ML Engineer & Neural Architect</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ghibli-green: #8EAC50;
+            --pinterest-red: #E50914;
+            --deep-black: #050505;
+            --glass: rgba(255, 255, 255, 0.03);
+        }
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--deep-black); 
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+        .code-font { font-family: 'Fira Code', monospace; }
+        
+        /* Glassmorphism */
+        .glass { 
+            background: var(--glass); 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 255, 255, 0.1); 
+        }
+        
+        /* Soft Glow Accents */
+        .glow-red { box-shadow: 0 0 50px -10px rgba(229, 9, 20, 0.2); }
+        .glow-green { box-shadow: 0 0 50px -10px rgba(142, 172, 80, 0.1); }
+
+        /* Smooth Hover */
+        .project-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .project-card:hover { 
+            transform: translateY(-10px) scale(1.02);
+            border-color: var(--pinterest-red);
+            background: rgba(229, 9, 20, 0.02);
+        }
+
+        /* Animated Background */
+        .bg-dots {
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+            background-size: 30px 30px;
+        }
+    </style>
+</head>
+<body class="bg-dots">
+
+    <!-- NAVIGATION -->
+    <nav class="fixed w-full z-50 px-6 py-6">
+        <div class="max-w-6xl mx-auto flex justify-between items-center glass px-6 py-3 rounded-full">
+            <div class="text-xl font-black tracking-tighter">
+                <span class="text-[var(--pinterest-red)]">HER</span>CODES<span class="text-gray-500">.UX</span>
+            </div>
+            <div class="hidden md:flex gap-8 text-xs font-bold uppercase tracking-widest text-gray-400">
+                <a href="#about" class="hover:text-[var(--pinterest-red)] transition-colors">About</a>
+                <a href="#projects" class="hover:text-[var(--pinterest-red)] transition-colors">Engineering</a>
+                <a href="#experience" class="hover:text-[var(--pinterest-red)] transition-colors">Experience</a>
+                <a href="mailto:rayavarapu.harshini@gmail.com" class="text-white bg-[var(--pinterest-red)] px-4 py-2 rounded-full hover:opacity-80">Get in Touch</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="min-h-screen flex items-center pt-20 px-6">
+        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div>
+                <div class="inline-block px-3 py-1 rounded-full border border-[var(--ghibli-green)] text-[var(--ghibli-green)] text-[10px] font-bold uppercase tracking-widest mb-6">
+                    ● Available for Roles in Aug 2026
+                </div>
+                <h1 class="text-6xl md:text-7xl font-extrabold leading-[1.1] mb-6">
+                    Engineering <span class="text-[var(--pinterest-red)] italic">Truth</span> <br>from Latent Data.
+                </h1>
+                <p class="text-gray-400 text-lg font-light max-w-lg mb-8">
+                    I am <span class="text-white font-semibold">Harshini</span>—a Machine Learning Engineer bridging the gap between enterprise reliability and neural creativity. 
+                    Specializing in high-scale retrieval and causal discovery.
+                </p>
+                <div class="flex gap-4">
+                    <a href="https://github.com/Hercodes-ux" class="glass px-8 py-4 rounded-2xl font-bold hover:bg-white hover:text-black transition-all">GitHub</a>
+                    <a href="#projects" class="bg-white text-black px-8 py-4 rounded-2xl font-bold hover:opacity-90 transition-all">View Systems</a>
+                </div>
+            </div>
+
+            <!-- THE DEEP CODER COMPONENT (Pretty Terminal) -->
+            <div class="glass p-1 rounded-3xl glow-red">
+                <div class="bg-[#0c0c0c] rounded-[22px] p-6 code-font text-sm leading-relaxed overflow-hidden relative">
+                    <div class="flex gap-1.5 mb-4">
+                        <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
+                        <div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+                    </div>
+                    <div class="text-gray-500 italic mb-2">// Querying latent space...</div>
+                    <div class="text-[var(--ghibli-green)]">class <span class="text-blue-400">NeuralArchitect</span>:</div>
+                    <div class="pl-4 text-gray-300">
+                        def <span class="text-yellow-400">__init__</span>(self):<br>
+                        &nbsp;&nbsp;self.latency = <span class="text-red-400">"sub-50ms"</span><br>
+                        &nbsp;&nbsp;self.mindset = <span class="text-red-400">"Production-First"</span><br>
+                        <br>
+                        <span class="text-blue-400">@property</span><br>
+                        def <span class="text-yellow-400">philosophy</span>(self):<br>
+                        &nbsp;&nbsp;return <span class="text-red-400">"Scale is an engineering choice."</span>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+                        <span class="text-[10px] text-gray-600 uppercase tracking-tighter">Status: Inference Active</span>
+                        <span class="text-[var(--pinterest-red)] animate-pulse">❤</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECTS MASONRY SECTION -->
+    <section id="projects" class="py-32 px-6 bg-gradient-to-b from-transparent to-[#080808]">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex justify-between items-end mb-16">
+                <div>
+                    <h2 class="text-4xl font-bold mb-4">Selected Systems</h2>
+                    <p class="text-gray-500 italic">Moving beyond research into industrial-grade AI.</p>
+                </div>
+                <div class="text-right hidden md:block">
+                    <span class="text-[var(--pinterest-red)] font-mono text-2xl font-black">01 / 03</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                
+                <!-- Project 1: NeuralStream -->
+                <div class="project-card glass p-8 rounded-[40px] flex flex-col justify-between h-[450px]">
+                    <div>
+                        <div class="flex justify-between mb-6">
+                            <span class="badge bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">MLE / Personalization</span>
+                            <span class="text-gray-700 text-xs">2026</span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-4 italic">NeuralStream</h3>
+                        <p class="text-gray-400 font-light leading-relaxed">
+                            Industrial-scale Two-Tower retrieval engine achieving sub-50ms latency. Decoupling user "Passports" from item "DNA" using PyTorch and FAISS.
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex gap-2">
+                            <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                            <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                        </div>
+                        <a href="https://github.com/Hercodes-ux/Two-Tower-Neural-Retrieval-and-Ranking-System" class="text-white font-bold group">
+                            Explore Source <span class="inline-block transition-transform group-hover:translate-x-2">→</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 2: Causal Inference -->
+                <div class="project-card glass p-8 rounded-[40px] flex flex-col justify-between h-[450px] glow-green">
+                    <div>
+                        <div class="flex justify-between mb-6">
+                            <span class="badge bg-green-500/10 text-green-500 border border-green-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Data Science / ROI</span>
+                            <span class="text-gray-700 text-xs">2026</span>
+                        </div>
+                        <h3 class="text-3xl font-bold mb-4 italic">Causal Analytics</h3>
+                        <p class="text-gray-400 font-light leading-relaxed">
+                            A measurement framework to quantify Incremental Lift. Identified a 700% bias over-estimation in standard product metrics using Propensity Score Matching.
+                        </p>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <a href="https://github.com/Hercodes-ux/Causal-Inference-Incremental-Lift-Analysis" class="text-white font-bold group">
+                            Read Case Study <span class="inline-block transition-transform group-hover:translate-x-2">→</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="py-20 px-6 border-t border-white/5">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
+            <div>
+                <p class="text-gray-500 text-sm">© 2026 Sai Venkata Harshini</p>
+                <p class="text-gray-700 text-[10px] uppercase mt-1 tracking-widest">Built with passion & PyTorch</p>
+            </div>
+            <div class="flex gap-8 text-sm font-bold">
+                <a href="https://linkedin.com/in/sai-venkata-harshini-rayavarapu" class="hover:text-[var(--pinterest-red)] transition-colors">LinkedIn</a>
+                <a href="https://github.com/Hercodes-ux" class="hover:text-[var(--pinterest-red)] transition-colors">GitHub</a>
+                <a href="mailto:rayavarapu.harshini@gmail.com" class="hover:text-[var(--pinterest-red)] transition-colors">Email</a>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>
