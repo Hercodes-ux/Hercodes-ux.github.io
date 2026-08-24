@@ -3,168 +3,216 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harshini | ML Engineer & Neural Architect</title>
+    <title>Harshini | Neural Architect & Data Scientist</title>
+    
+    <!-- Professional Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    
+    <!-- Core UI Engine (Tailwind) & Animations -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
     <style>
         :root {
-            --ghibli-green: #8EAC50;
-            --pinterest-red: #E50914;
-            --deep-black: #050505;
-            --glass: rgba(255, 255, 255, 0.03);
+            --sea-depth: #0a192f;
+            --radiant-blue: #00d2ff;
+            --cyan-glow: #00fff2;
+            --ghibli-beige: #f4f1de;
+            --paper: #fdfaf0;
+            --accent-coral: #ff6b6b;
         }
+
         body { 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            background-color: var(--deep-black); 
-            color: #f8fafc;
+            background-color: var(--sea-depth); 
+            color: var(--ghibli-beige);
+            font-family: 'Plus Jakarta Sans', sans-serif;
             overflow-x: hidden;
+            scroll-behavior: smooth;
         }
+
+        /* Deep Water Background Animation */
+        .ocean-bg {
+            background: radial-gradient(circle at 50% 50%, #112240 0%, #0a192f 100%);
+            position: fixed; width: 100%; height: 100%; z-index: -1;
+        }
+
+        .bubble {
+            position: absolute; background: rgba(0, 255, 242, 0.1);
+            border-radius: 50%; pointer-events: none;
+            animation: float 20s infinite linear;
+        }
+
+        @keyframes float {
+            0% { transform: translateY(100vh) scale(0); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateY(-10vh) scale(1.5); opacity: 0; }
+        }
+
+        /* Ghibli Glassmorphism */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 242, 0.1);
+            border-radius: 24px;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .glass-card:hover {
+            background: rgba(0, 210, 255, 0.05);
+            border-color: var(--cyan-glow);
+            transform: translateY(-15px);
+            box-shadow: 0 30px 60px -12px rgba(0, 255, 242, 0.2);
+        }
+
+        .serif { font-family: 'Playfair Display', serif; }
         .code-font { font-family: 'Fira Code', monospace; }
-        
-        /* Glassmorphism */
-        .glass { 
-            background: var(--glass); 
-            backdrop-filter: blur(12px); 
-            border: 1px solid rgba(255, 255, 255, 0.1); 
-        }
-        
-        /* Soft Glow Accents */
-        .glow-red { box-shadow: 0 0 50px -10px rgba(229, 9, 20, 0.2); }
-        .glow-green { box-shadow: 0 0 50px -10px rgba(142, 172, 80, 0.1); }
 
-        /* Smooth Hover */
-        .project-card { transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .project-card:hover { 
-            transform: translateY(-10px) scale(1.02);
-            border-color: var(--pinterest-red);
-            background: rgba(229, 9, 20, 0.02);
-        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--sea-depth); }
+        ::-webkit-scrollbar-thumb { background: var(--cyan-glow); border-radius: 10px; }
 
-        /* Animated Background */
-        .bg-dots {
-            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 1px, transparent 1px);
-            background-size: 30px 30px;
+        .text-glow { text-shadow: 0 0 15px rgba(0, 255, 242, 0.5); }
+        .btn-radiant {
+            background: linear-gradient(90deg, var(--radiant-blue), var(--cyan-glow));
+            color: var(--sea-depth);
+            box-shadow: 0 10px 20px -5px rgba(0, 255, 242, 0.4);
         }
     </style>
 </head>
-<body class="bg-dots">
+<body>
 
-    <!-- NAVIGATION -->
-    <nav class="fixed w-full z-50 px-6 py-6">
-        <div class="max-w-6xl mx-auto flex justify-between items-center glass px-6 py-3 rounded-full">
-            <div class="text-xl font-black tracking-tighter">
-                <span class="text-[var(--pinterest-red)]">HER</span>CODES<span class="text-gray-500">.UX</span>
+    <div class="ocean-bg" id="bubbles"></div>
+
+    <!-- NAVBAR -->
+    <nav class="fixed w-full z-50 p-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center glass-card px-8 py-4">
+            <div class="text-2xl font-extrabold tracking-tighter serif">
+                <span class="text-[var(--cyan-glow)] text-glow">H</span>ERCODES
             </div>
-            <div class="hidden md:flex gap-8 text-xs font-bold uppercase tracking-widest text-gray-400">
-                <a href="#about" class="hover:text-[var(--pinterest-red)] transition-colors">About</a>
-                <a href="#projects" class="hover:text-[var(--pinterest-red)] transition-colors">Engineering</a>
-                <a href="#experience" class="hover:text-[var(--pinterest-red)] transition-colors">Experience</a>
-                <a href="mailto:rayavarapu.harshini@gmail.com" class="text-white bg-[var(--pinterest-red)] px-4 py-2 rounded-full hover:opacity-80">Get in Touch</a>
+            <div class="hidden md:flex gap-10 text-[10px] font-bold uppercase tracking-[0.2em] opacity-70">
+                <a href="#home" class="hover:text-[var(--cyan-glow)] transition-all">Portal</a>
+                <a href="#work" class="hover:text-[var(--cyan-glow)] transition-all">Systems</a>
+                <a href="#lab" class="hover:text-[var(--cyan-glow)] transition-all">Lab</a>
+                <a href="mailto:rayavarapu.harshini@gmail.com" class="text-[var(--cyan-glow)] border border-[var(--cyan-glow)] px-4 py-1 rounded-full">Signal</a>
             </div>
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
-    <section class="min-h-screen flex items-center pt-20 px-6">
-        <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-            <div>
-                <div class="inline-block px-3 py-1 rounded-full border border-[var(--ghibli-green)] text-[var(--ghibli-green)] text-[10px] font-bold uppercase tracking-widest mb-6">
-                    ● Available for Roles in Aug 2026
-                </div>
-                <h1 class="text-6xl md:text-7xl font-extrabold leading-[1.1] mb-6">
-                    Engineering <span class="text-[var(--pinterest-red)] italic">Truth</span> <br>from Latent Data.
+    <!-- HERO -->
+    <section id="home" class="min-h-screen flex items-center pt-20 px-10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20">
+            <div class="animate__animated animate__fadeInUp">
+                <h2 class="text-[var(--radiant-blue)] font-bold tracking-[0.3em] mb-4 text-xs uppercase">Machine Learning Engineer</h2>
+                <h1 class="text-7xl md:text-8xl font-bold serif mb-8 leading-tight">
+                    Decoding <br><span class="italic text-[var(--cyan-glow)] text-glow">Aesthetics.</span>
                 </h1>
-                <p class="text-gray-400 text-lg font-light max-w-lg mb-8">
-                    I am <span class="text-white font-semibold">Harshini</span>—a Machine Learning Engineer bridging the gap between enterprise reliability and neural creativity. 
-                    Specializing in high-scale retrieval and causal discovery.
+                <p class="text-gray-400 text-xl font-light leading-relaxed max-w-lg mb-10">
+                    I build high-scale neural systems where <span class="text-white">latency meets truth</span>. 
+                    Bridging MS-level research with industrial production.
                 </p>
-                <div class="flex gap-4">
-                    <a href="https://github.com/Hercodes-ux" class="glass px-8 py-4 rounded-2xl font-bold hover:bg-white hover:text-black transition-all">GitHub</a>
-                    <a href="#projects" class="bg-white text-black px-8 py-4 rounded-2xl font-bold hover:opacity-90 transition-all">View Systems</a>
+                <div class="flex gap-6">
+                    <a href="#work" class="btn-radiant px-10 py-5 rounded-2xl font-black text-sm uppercase tracking-widest transition-all hover:scale-105">View Architecture</a>
+                    <a href="https://github.com/Hercodes-ux" class="glass-card px-10 py-5 rounded-2xl font-bold text-sm transition-all hover:bg-white/10">GitHub</a>
                 </div>
             </div>
 
-            <!-- THE DEEP CODER COMPONENT (Pretty Terminal) -->
-            <div class="glass p-1 rounded-3xl glow-red">
-                <div class="bg-[#0c0c0c] rounded-[22px] p-6 code-font text-sm leading-relaxed overflow-hidden relative">
-                    <div class="flex gap-1.5 mb-4">
-                        <div class="w-3 h-3 rounded-full bg-red-500/20 border border-red-500/50"></div>
-                        <div class="w-3 h-3 rounded-full bg-yellow-500/20 border border-yellow-500/50"></div>
-                        <div class="w-3 h-3 rounded-full bg-green-500/20 border border-green-500/50"></div>
+            <!-- Deep Coder Terminal -->
+            <div class="hidden lg:block glass-card p-1 relative" data-aos="zoom-in">
+                <div class="bg-[#050b1a] rounded-[22px] p-8 code-font text-sm">
+                    <div class="flex gap-2 mb-6">
+                        <div class="w-3 h-3 rounded-full bg-red-400 opacity-50"></div>
+                        <div class="w-3 h-3 rounded-full bg-yellow-400 opacity-50"></div>
+                        <div class="w-3 h-3 rounded-full bg-cyan-400 opacity-50"></div>
                     </div>
-                    <div class="text-gray-500 italic mb-2">// Querying latent space...</div>
-                    <div class="text-[var(--ghibli-green)]">class <span class="text-blue-400">NeuralArchitect</span>:</div>
-                    <div class="pl-4 text-gray-300">
-                        def <span class="text-yellow-400">__init__</span>(self):<br>
-                        &nbsp;&nbsp;self.latency = <span class="text-red-400">"sub-50ms"</span><br>
-                        &nbsp;&nbsp;self.mindset = <span class="text-red-400">"Production-First"</span><br>
-                        <br>
-                        <span class="text-blue-400">@property</span><br>
-                        def <span class="text-yellow-400">philosophy</span>(self):<br>
-                        &nbsp;&nbsp;return <span class="text-red-400">"Scale is an engineering choice."</span>
+                    <p class="text-cyan-500/50 mb-2"># Neural Architecture initialized...</p>
+                    <p class="text-blue-300">class <span class="text-cyan-400">Harshini</span>:</p>
+                    <div class="pl-5 space-y-1">
+                        <p>education = <span class="text-orange-300">"MS Computer Science"</span></p>
+                        <p>focus = [<span class="text-orange-300">"Retrieval"</span>, <span class="text-orange-300">"Causality"</span>]</p>
+                        <p>stack = {<span class="text-orange-300">"PyTorch"</span>, <span class="text-orange-300">"FAISS"</span>, <span class="text-orange-300">"FastAPI"</span>}</p>
                     </div>
-                    <div class="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
-                        <span class="text-[10px] text-gray-600 uppercase tracking-tighter">Status: Inference Active</span>
-                        <span class="text-[var(--pinterest-red)] animate-pulse">❤</span>
+                    <p class="mt-4 text-cyan-400">def <span class="text-blue-300">solve_latency</span>(self):</p>
+                    <div class="pl-5">
+                        <p class="text-white">return <span class="italic">"Sub-50ms or it's not production."</span></p>
+                    </div>
+                    <div class="mt-10 flex justify-between items-center opacity-20">
+                        <span>Llama 3.3 Active</span>
+                        <span class="animate-pulse">●</span>
                     </div>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- PROJECTS MASONRY SECTION -->
-    <section id="projects" class="py-32 px-6 bg-gradient-to-b from-transparent to-[#080808]">
-        <div class="max-w-6xl mx-auto">
-            <div class="flex justify-between items-end mb-16">
-                <div>
-                    <h2 class="text-4xl font-bold mb-4">Selected Systems</h2>
-                    <p class="text-gray-500 italic">Moving beyond research into industrial-grade AI.</p>
-                </div>
-                <div class="text-right hidden md:block">
-                    <span class="text-[var(--pinterest-red)] font-mono text-2xl font-black">01 / 03</span>
-                </div>
+    <!-- PROJECT SECTION (Detailed 3-Grid) -->
+    <section id="work" class="py-32 px-10">
+        <div class="max-w-7xl mx-auto">
+            <div class="mb-20" data-aos="fade-right">
+                <h3 class="serif text-5xl font-bold mb-4 italic">The Engineering Artifacts</h3>
+                <div class="w-20 h-1 bg-[var(--cyan-glow)]"></div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-10">
                 
                 <!-- Project 1: NeuralStream -->
-                <div class="project-card glass p-8 rounded-[40px] flex flex-col justify-between h-[450px]">
+                <div class="glass-card p-10 h-[550px] flex flex-col justify-between" data-aos="fade-up">
                     <div>
-                        <div class="flex justify-between mb-6">
-                            <span class="badge bg-red-500/10 text-red-500 border border-red-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">MLE / Personalization</span>
-                            <span class="text-gray-700 text-xs">2026</span>
-                        </div>
-                        <h3 class="text-3xl font-bold mb-4 italic">NeuralStream</h3>
+                        <div class="text-cyan-400 code-font text-xs mb-6 tracking-widest uppercase font-bold">Inference System</div>
+                        <h4 class="text-3xl font-bold serif mb-6">NeuralStream: Two-Tower Retrieval</h4>
                         <p class="text-gray-400 font-light leading-relaxed">
-                            Industrial-scale Two-Tower retrieval engine achieving sub-50ms latency. Decoupling user "Passports" from item "DNA" using PyTorch and FAISS.
+                            Industrial personalization engine achieving sub-50ms latency. Optimized for 1M+ candidates using vector search and latent space mapping.
                         </p>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <div class="flex gap-2">
-                            <span class="w-2 h-2 rounded-full bg-white/20"></span>
-                            <span class="w-2 h-2 rounded-full bg-white/20"></span>
+                    <div class="pt-8 border-t border-white/5">
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="bg-blue-500/10 text-blue-300 text-[10px] px-3 py-1 rounded-full border border-blue-500/20">PyTorch</span>
+                            <span class="bg-blue-500/10 text-blue-300 text-[10px] px-3 py-1 rounded-full border border-blue-500/20">FAISS</span>
                         </div>
-                        <a href="https://github.com/Hercodes-ux/Two-Tower-Neural-Retrieval-and-Ranking-System" class="text-white font-bold group">
-                            Explore Source <span class="inline-block transition-transform group-hover:translate-x-2">→</span>
+                        <a href="https://github.com/Hercodes-ux/Two-Tower-Neural-Retrieval-and-Ranking-System" class="text-[var(--cyan-glow)] font-bold text-xs flex items-center gap-2 group">
+                            EXAMINE SOURCE <span class="group-hover:translate-x-3 transition-transform">→</span>
                         </a>
                     </div>
                 </div>
 
                 <!-- Project 2: Causal Inference -->
-                <div class="project-card glass p-8 rounded-[40px] flex flex-col justify-between h-[450px] glow-green">
+                <div class="glass-card p-10 h-[550px] flex flex-col justify-between" data-aos="fade-up" data-aos-delay="100">
                     <div>
-                        <div class="flex justify-between mb-6">
-                            <span class="badge bg-green-500/10 text-green-500 border border-green-500/20 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest">Data Science / ROI</span>
-                            <span class="text-gray-700 text-xs">2026</span>
-                        </div>
-                        <h3 class="text-3xl font-bold mb-4 italic">Causal Analytics</h3>
+                        <div class="text-cyan-400 code-font text-xs mb-6 tracking-widest uppercase font-bold">Measurement Framework</div>
+                        <h4 class="text-3xl font-bold serif mb-6">Causal Lift & ROI Discovery</h4>
                         <p class="text-gray-400 font-light leading-relaxed">
-                            A measurement framework to quantify Incremental Lift. Identified a 700% bias over-estimation in standard product metrics using Propensity Score Matching.
+                            Quantifying feature ROI by identifying a 700% bias error in traditional metrics using Propensity Score Matching and counterfactuals.
                         </p>
                     </div>
-                    <div class="flex justify-between items-center">
-                        <a href="https://github.com/Hercodes-ux/Causal-Inference-Incremental-Lift-Analysis" class="text-white font-bold group">
-                            Read Case Study <span class="inline-block transition-transform group-hover:translate-x-2">→</span>
+                    <div class="pt-8 border-t border-white/5">
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="bg-blue-500/10 text-blue-300 text-[10px] px-3 py-1 rounded-full border border-blue-500/20">Statistics</span>
+                            <span class="bg-blue-500/10 text-blue-300 text-[10px] px-3 py-1 rounded-full border border-blue-500/20">CausalML</span>
+                        </div>
+                        <a href="https://github.com/Hercodes-ux/Causal-Inference-Incremental-Lift-Analysis" class="text-[var(--cyan-glow)] font-bold text-xs flex items-center gap-2 group">
+                            EXAMINE METHODOLOGY <span class="group-hover:translate-x-3 transition-transform">→</span>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Project 3: Synapse AI -->
+                <div class="glass-card p-10 h-[550px] flex flex-col justify-between" data-aos="fade-up" data-aos-delay="200">
+                    <div>
+                        <div class="text-cyan-400 code-font text-xs mb-6 tracking-widest uppercase font-bold">NLP Intelligence</div>
+                        <h4 class="text-3xl font-bold serif mb-6">NLP Text-Intelligence System</h4>
+                        <p class="text-gray-400 font-light leading-relaxed">
+                            Modular pipeline detecting misinformation across 44,000+ articles. High-precision classification using hyperparameter-tuned TF-IDF.
+                        </p>
+                    </div>
+                    <div class="pt-8 border-t border-white/5">
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="bg-blue-500/10 text-blue-300 text-[10px] px-3 py-1 rounded-full border border-blue-500/20">Scikit-Learn</span>
+                            <span class="bg-blue-500/10 text-blue-300 text-[10px] px-3 py-1 rounded-full border border-blue-500/20">TF-IDF</span>
+                        </div>
+                        <a href="https://github.com/Hercodes-ux/NLP-Misinformation-Detection-System" class="text-[var(--cyan-glow)] font-bold text-xs flex items-center gap-2 group">
+                            EXAMINE PIPELINE <span class="group-hover:translate-x-3 transition-transform">→</span>
                         </a>
                     </div>
                 </div>
@@ -174,19 +222,33 @@
     </section>
 
     <!-- FOOTER -->
-    <footer class="py-20 px-6 border-t border-white/5">
-        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-8">
-            <div>
-                <p class="text-gray-500 text-sm">© 2026 Sai Venkata Harshini</p>
-                <p class="text-gray-700 text-[10px] uppercase mt-1 tracking-widest">Built with passion & PyTorch</p>
-            </div>
-            <div class="flex gap-8 text-sm font-bold">
-                <a href="https://linkedin.com/in/sai-venkata-harshini-rayavarapu" class="hover:text-[var(--pinterest-red)] transition-colors">LinkedIn</a>
-                <a href="https://github.com/Hercodes-ux" class="hover:text-[var(--pinterest-red)] transition-colors">GitHub</a>
-                <a href="mailto:rayavarapu.harshini@gmail.com" class="hover:text-[var(--pinterest-red)] transition-colors">Email</a>
-            </div>
+    <footer class="py-20 px-10 border-t border-white/5 text-center">
+        <h2 class="serif text-3xl italic mb-6">Designed with Passion. Powered by Neural Nets.</h2>
+        <div class="flex justify-center gap-10 opacity-50 text-xs font-bold uppercase tracking-widest mb-10">
+            <a href="https://linkedin.com/in/sai-venkata-harshini-rayavarapu" class="hover:text-cyan-400">LinkedIn</a>
+            <a href="https://github.com/Hercodes-ux" class="hover:text-cyan-400">GitHub</a>
+            <a href="mailto:rayavarapu.harshini@gmail.com" class="hover:text-cyan-400">Email</a>
         </div>
+        <p class="text-gray-700 text-[10px]">© 2026 Sai Venkata Harshini | Cleveland State University</p>
     </footer>
 
+    <script>
+        // Initialize AOS
+        AOS.init({ duration: 1000, once: true });
+
+        // Bubble Generator
+        const container = document.getElementById('bubbles');
+        for(let i=0; i<15; i++) {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            const size = Math.random() * 60 + 10;
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = Math.random() * 100 + '%';
+            bubble.style.animationDelay = Math.random() * 20 + 's';
+            bubble.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            container.appendChild(bubble);
+        }
+    </script>
 </body>
 </html>
