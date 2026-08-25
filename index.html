@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Harshini | Neural Architect & Data Intelligence</title>
+    <title>Harshini | Neural Architect & Systems Engineer</title>
     
-    <!-- Professional Typography -->
-    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,700&family=Sora:wght@300;400;600;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Professional Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,700&family=Sora:wght@300;400;600;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
     
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
@@ -14,11 +14,11 @@
 
     <style>
         :root {
-            --abyss: #050b14;
+            --abyss: #040d16;
             --radiant-cyan: #00fff2;
-            --deep-sea: #0a192f;
+            --deep-sea: #071a2b;
             --ghibli-beige: #f4f1de;
-            --coral: #ff6b6b;
+            --coral-glow: #ff7f50;
         }
 
         body { 
@@ -29,243 +29,249 @@
         }
 
         .serif { font-family: 'Fraunces', serif; }
-        .mono { font-family: 'JetBrains Mono', monospace; }
+        .mono { font-family: 'Fira Code', monospace; }
 
-        /* Underwater Caustics Effect */
-        .ocean-floor {
+        /* Underwater Light (Caustics) */
+        .ocean-surface {
             position: fixed; inset: 0; z-index: -1;
-            background: linear-gradient(180deg, #0a192f 0%, #050b14 100%);
+            background: linear-gradient(180deg, #0a2533 0%, #040d16 100%);
         }
-
-        .caustics {
+        .caustics-layer {
             position: fixed; inset: 0; z-index: -1;
             background-image: url('https://www.transparenttextures.com/patterns/carbon-fibre.png');
-            opacity: 0.05;
+            opacity: 0.08; mix-blend-mode: overlay;
+            animation: waterMove 30s infinite alternate;
         }
+        @keyframes waterMove { from { transform: scale(1); } to { transform: scale(1.1) rotate(2deg); } }
 
-        /* Bioluminescent Glows */
-        .glow-node {
-            position: absolute; width: 300px; height: 300px;
-            background: radial-gradient(circle, rgba(0, 255, 242, 0.1) 0%, transparent 70%);
-            border-radius: 50%; filter: blur(50px);
-        }
-
-        /* Ghibli Paper Cards */
-        .glass-card {
-            background: rgba(255, 255, 255, 0.02);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 255, 242, 0.1);
-            transition: all 0.5s cubic-bezier(0.2, 1, 0.3, 1);
-        }
-
-        .glass-card:hover {
-            border-color: var(--radiant-cyan);
-            background: rgba(0, 255, 242, 0.03);
-            transform: translateY(-10px);
-            box-shadow: 0 20px 50px -10px rgba(0, 255, 242, 0.2);
-        }
-
-        /* Swetha-Style Terminal */
-        .terminal-header {
-            background: rgba(255, 255, 255, 0.05);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-cyan {
-            background: var(--radiant-cyan);
-            color: var(--abyss);
-            font-weight: 800;
-            box-shadow: 0 0 20px rgba(0, 255, 242, 0.4);
-        }
-
-        /* Animated Bubbles */
+        /* Bioluminescence Animation */
         .bubble {
-            position: absolute; background: rgba(0, 255, 242, 0.2);
-            border-radius: 50%; animation: rise 15s infinite ease-in;
+            position: absolute; background: radial-gradient(circle, rgba(0, 255, 242, 0.4) 0%, transparent 70%);
+            border-radius: 50%; pointer-events: none; animation: rise 15s infinite ease-in;
         }
         @keyframes rise {
             0% { transform: translateY(110vh) scale(0); opacity: 0; }
-            50% { opacity: 0.3; }
-            100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+            50% { opacity: 0.6; }
+            100% { transform: translateY(-20vh) scale(1.5); opacity: 0; }
+        }
+
+        /* Swetha-Style Card Mechanics */
+        .glass-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(0, 255, 242, 0.08);
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .glass-card:hover {
+            border-color: var(--radiant-cyan);
+            background: rgba(0, 255, 242, 0.04);
+            transform: scale(1.02) translateY(-5px);
+            box-shadow: 0 40px 80px -15px rgba(0, 255, 242, 0.15);
+        }
+
+        /* Timeline Styles */
+        .timeline-line { border-left: 2px dashed rgba(0, 255, 242, 0.2); }
+        .timeline-dot { background: var(--radiant-cyan); box-shadow: 0 0 15px var(--radiant-cyan); }
+
+        .text-gradient {
+            background: linear-gradient(90deg, #fff 0%, var(--radiant-cyan) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
 <body class="selection:bg-[var(--radiant-cyan)] selection:text-black">
 
-    <div class="ocean-floor"></div>
-    <div class="caustics"></div>
-    <div id="bubble-container"></div>
+    <div class="ocean-surface"></div>
+    <div class="caustics-layer"></div>
+    <div id="bubble-field"></div>
 
-    <!-- NAVIGATION -->
-    <nav class="fixed w-full z-50 p-6 md:p-10">
+    <!-- HEADER / NAV -->
+    <nav class="fixed w-full z-50 p-6 md:p-12 transition-all" id="navbar">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="text-xl font-bold tracking-tighter mono">
-                <span class="text-[var(--radiant-cyan)]">00</span>_HARSHINI.SYS
+            <div class="text-2xl font-bold tracking-tighter serif">
+                H<span class="text-[var(--radiant-cyan)]">.</span>SYSTEMS
             </div>
-            <div class="flex gap-8 text-[10px] font-bold uppercase tracking-widest opacity-60">
-                <a href="#about" class="hover:text-[var(--radiant-cyan)] transition-all">Identity</a>
-                <a href="#work" class="hover:text-[var(--radiant-cyan)] transition-all">Systems</a>
-                <a href="#contact" class="hover:text-[var(--radiant-cyan)] transition-all">Contact</a>
+            <div class="hidden md:flex gap-12 text-[9px] font-bold uppercase tracking-[0.3em] opacity-50">
+                <a href="#about" class="hover:text-[var(--radiant-cyan)] hover:opacity-100 transition-all">Identity</a>
+                <a href="#experience" class="hover:text-[var(--radiant-cyan)] hover:opacity-100 transition-all">Timeline</a>
+                <a href="#work" class="hover:text-[var(--radiant-cyan)] hover:opacity-100 transition-all">Artifacts</a>
+                <a href="mailto:rayavarapu.harshini@gmail.com" class="text-[var(--radiant-cyan)] opacity-100 border border-[var(--radiant-cyan)] px-4 py-1 rounded-full">Contact</a>
             </div>
         </div>
     </nav>
 
     <!-- HERO SECTION -->
     <section class="min-h-screen flex items-center px-10 relative overflow-hidden">
-        <div class="glow-node top-[-10%] left-[-5%]"></div>
-        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
             <div data-aos="fade-right">
-                <div class="inline-block px-4 py-1 rounded-full border border-[var(--radiant-cyan)]/30 text-[var(--radiant-cyan)] text-[9px] font-bold uppercase tracking-widest mb-8">
-                    Available for Opportunities · Aug 2026
-                </div>
-                <h1 class="text-7xl md:text-8xl font-bold serif mb-8 leading-[0.9]">
-                    Neural <br><span class="text-[var(--radiant-cyan)] italic">Discovery.</span>
+                <p class="mono text-[var(--radiant-cyan)] text-xs mb-6 tracking-widest uppercase animate-pulse">● System Status: Online</p>
+                <h1 class="text-7xl md:text-9xl font-bold serif leading-[0.85] mb-8 text-gradient">
+                    Neural <br><span class="italic">Abyss.</span>
                 </h1>
                 <p class="text-gray-400 text-lg md:text-xl font-light leading-relaxed max-w-lg mb-12">
-                    I am a <span class="text-white font-semibold">Machine Learning practitioner</span> bridging the gap between high-volume enterprise data systems and neural architectures.
+                    I am <span class="text-white font-semibold">Sai Venkata Harshini</span>. I architect high-scale ML pipelines that transform raw data into predictive truth.
                 </p>
-                <div class="flex flex-wrap gap-6">
-                    <a href="#work" class="btn-cyan px-10 py-4 rounded-xl text-xs uppercase tracking-widest hover:scale-105 transition-all">Explore Artifacts</a>
-                    <a href="https://github.com/Hercodes-ux" class="glass-card px-10 py-4 rounded-xl text-xs uppercase tracking-widest font-bold">Terminal</a>
+                <div class="flex gap-8">
+                    <a href="#work" class="bg-[var(--radiant-cyan)] text-black px-12 py-5 rounded-2xl font-black text-xs uppercase tracking-widest hover:brightness-110 transition-all">View Portfolios</a>
+                    <a href="https://github.com/Hercodes-ux" class="glass-card px-12 py-5 rounded-2xl font-bold text-xs uppercase tracking-widest">GitHub</a>
                 </div>
             </div>
 
-            <!-- THE DEEP CODER COMPONENT -->
-            <div class="glass-card rounded-[32px] overflow-hidden p-1 shadow-2xl" data-aos="zoom-in">
-                <div class="terminal-header p-4 flex gap-2">
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#ff5f56]"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#ffbd2e]"></div>
-                    <div class="w-2.5 h-2.5 rounded-full bg-[#27c93f]"></div>
-                    <span class="ml-4 text-[10px] mono opacity-40">inference_engine.py</span>
+            <!-- ACCOMPLISHMENTS COUNTER (Swetha Component) -->
+            <div class="grid grid-cols-2 gap-4" data-aos="zoom-in">
+                <div class="glass-card p-8 text-center rounded-[40px]">
+                    <div class="text-4xl font-bold serif text-[var(--radiant-cyan)]">50ms</div>
+                    <p class="text-[9px] uppercase tracking-widest opacity-40 mt-2">Inference Latency</p>
                 </div>
-                <div class="p-8 mono text-sm leading-relaxed bg-[#050b14]/80">
-                    <p class="text-cyan-500/50"># Initializing 1.2y enterprise experience...</p>
-                    <p class="text-blue-300">class <span class="text-yellow-200">Harshini</span>:</p>
-                    <div class="pl-6">
-                        <p>status = <span class="text-emerald-400">"Mastering_the_Abyss"</span></p>
-                        <p>focus = [<span class="text-emerald-400">"Retrieval_Scaling"</span>, <span class="text-emerald-400">"Causal_Truth"</span>]</p>
-                        <p>philosophy = <span class="text-emerald-400">"Latency_is_not_an_option"</span></p>
-                    </div>
-                    <p class="mt-4 text-pink-400">def <span class="text-blue-300">optimize_data</span>(self, pipeline):</p>
-                    <div class="pl-6">
-                        <p class="text-white">return <span class="italic">"Banking-grade reliability @ production scale"</span></p>
-                    </div>
-                    <div class="mt-8 pt-6 border-t border-white/5 flex justify-between items-center opacity-30 text-[10px]">
-                        <span>LAST COMMIT: 24-08-2026</span>
-                        <span class="animate-pulse">SIGNAL ACTIVE</span>
-                    </div>
+                <div class="glass-card p-8 text-center rounded-[40px]">
+                    <div class="text-4xl font-bold serif text-[var(--radiant-cyan)]">44k+</div>
+                    <p class="text-[9px] uppercase tracking-widest opacity-40 mt-2">Articles Processed</p>
+                </div>
+                <div class="glass-card p-8 text-center rounded-[40px]">
+                    <div class="text-4xl font-bold serif text-[var(--radiant-cyan)]">99.9%</div>
+                    <p class="text-[9px] uppercase tracking-widest opacity-40 mt-2">Data Integrity</p>
+                </div>
+                <div class="glass-card p-8 text-center rounded-[40px]">
+                    <div class="text-4xl font-bold serif text-[var(--radiant-cyan)]">700%</div>
+                    <p class="text-[9px] uppercase tracking-widest opacity-40 mt-2">Bias Correction</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- IDENTITY SECTION (Fixing Claude's Feedback) -->
-    <section id="about" class="py-32 px-10">
-        <div class="max-w-4xl mx-auto text-center" data-aos="fade-up">
-            <h3 class="serif text-4xl mb-12 italic">The Narrative</h3>
-            <p class="text-gray-400 text-xl leading-relaxed font-light mb-8">
-                I spent 14 months at <span class="text-white font-semibold">Accenture</span> engineering high-integrity banking pipelines. I learned that data is messy, but production systems must be perfect. 
-            </p>
-            <p class="text-gray-400 text-xl leading-relaxed font-light">
-                Currently, I am completing my <span class="text-white font-semibold">M.S. in Computer Science at Cleveland State University (Expected May 2026)</span>. My work focuses on moving ML from research notebooks into scalable, sub-50ms microservices.
-            </p>
-        </div>
-    </section>
-
-    <!-- PROJECT GRID (3 Detailed Projects) -->
-    <section id="work" class="py-32 px-10 bg-black/20">
-        <div class="max-w-7xl mx-auto">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
+    <!-- EXPERIENCE TIMELINE (Detailed) -->
+    <section id="experience" class="py-32 px-10">
+        <div class="max-w-4xl mx-auto">
+            <h3 class="serif text-5xl italic mb-16" data-aos="fade-up">Professional Journey</h3>
+            <div class="timeline-line pl-10 space-y-16">
                 
-                <!-- Project 1: NeuralStream -->
-                <div class="glass-card p-10 flex flex-col justify-between group" data-aos="fade-up">
+                <!-- Accenture -->
+                <div class="relative" data-aos="fade-left">
+                    <div class="timeline-dot absolute left-[-47px] top-2 w-4 h-4 rounded-full"></div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-2xl font-bold serif italic">Accenture Pvt Ltd</h4>
+                        <span class="mono text-[10px] opacity-40 uppercase">Oct 2022 — Dec 2023</span>
+                    </div>
+                    <p class="text-[var(--radiant-cyan)] mono text-[10px] uppercase font-bold mb-4">Application Development Associate</p>
+                    <ul class="text-gray-400 text-sm space-y-3 font-light leading-relaxed">
+                        <li>• Spearheaded high-volume banking data pipelines, reducing retrieval latency by **15%**.</li>
+                        <li>• Re-engineered legacy modules into modernized SQL environments ensuring **99.9% integrity**.</li>
+                        <li>• Transitioned manual workflows into automated SQL-based analytical environments.</li>
+                    </ul>
+                </div>
+
+                <!-- CSU -->
+                <div class="relative" data-aos="fade-left" data-aos-delay="100">
+                    <div class="timeline-dot absolute left-[-47px] top-2 w-4 h-4 rounded-full"></div>
+                    <div class="flex justify-between items-center mb-4">
+                        <h4 class="text-2xl font-bold serif italic">Cleveland State University</h4>
+                        <span class="mono text-[10px] opacity-40 uppercase">Jan 2024 — May 2026</span>
+                    </div>
+                    <p class="text-[var(--radiant-cyan)] mono text-[10px] uppercase font-bold mb-4">MS in Computer Science</p>
+                    <p class="text-gray-400 text-sm leading-relaxed">Focusing on Deep Learning and Causal Inference. Leading technical seminars for 200+ students as part of the ACM community.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- PROJECT SHOWCASE (FAANG Detailed) -->
+    <section id="work" class="py-32 px-10 bg-black/30">
+        <div class="max-w-7xl mx-auto">
+            <h3 class="serif text-5xl italic mb-20 text-center" data-aos="fade-up">Technical Artifacts</h3>
+            
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+                
+                <!-- Project 1 -->
+                <div class="glass-card p-10 rounded-[48px] flex flex-col justify-between h-full" data-aos="fade-up">
                     <div>
-                        <div class="flex justify-between items-center mb-8">
-                            <span class="text-[var(--radiant-cyan)] mono text-[10px] tracking-tighter">RETRIEVAL ENGINE</span>
-                            <span class="text-white/20 text-xs italic">2026</span>
-                        </div>
+                        <h5 class="mono text-[var(--radiant-cyan)] text-[9px] mb-8 tracking-widest uppercase font-bold">Systems / Retrieval</h5>
                         <h4 class="text-3xl font-bold serif mb-6 italic">NeuralStream</h4>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                            Two-Tower Retrieval System solving the Scale-vs-Latency paradox. Maps 1M+ items into latent space for real-time inference.
+                        <p class="text-gray-400 text-sm font-light leading-relaxed mb-8">
+                            A production-ready Two-Tower retrieval engine for Netflix-scale personalization. Achieved sub-50ms latency using FAISS ANN indexing.
                         </p>
-                        <div class="flex gap-4 text-coral font-bold text-[10px] mono">
-                            <span>< 50MS LATENCY</span>
-                            <span>FAISS ANN</span>
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[9px] mono">PyTorch</span>
+                            <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[9px] mono">FastAPI</span>
                         </div>
                     </div>
-                    <a href="https://github.com/Hercodes-ux/Two-Tower-Neural-Retrieval-and-Ranking-System" class="mt-12 block border-b border-[var(--radiant-cyan)] pb-2 text-[var(--radiant-cyan)] font-bold text-xs group-hover:pl-4 transition-all">VIEW REPOSITORY →</a>
+                    <a href="https://github.com/Hercodes-ux/Two-Tower-Neural-Retrieval-and-Ranking-System" class="text-[var(--radiant-cyan)] font-bold text-[10px] tracking-widest border-b border-[var(--radiant-cyan)] pb-2 w-fit">VIEW DEEP DIVE →</a>
                 </div>
 
-                <!-- Project 2: Causal Analytics -->
-                <div class="glass-card p-10 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="100">
+                <!-- Project 2 -->
+                <div class="glass-card p-10 rounded-[48px] flex flex-col justify-between h-full" data-aos="fade-up" data-aos-delay="100">
                     <div>
-                        <div class="flex justify-between items-center mb-8">
-                            <span class="text-[var(--radiant-cyan)] mono text-[10px] tracking-tighter">MEASUREMENT FRAMEWORK</span>
-                            <span class="text-white/20 text-xs italic">2026</span>
-                        </div>
-                        <h4 class="text-3xl font-bold serif mb-6 italic">Causal Analytics</h4>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                            Identifying true feature ROI by de-biasing engagement data. Caught a 700% over-estimation error in standard product metrics.
+                        <h5 class="mono text-[var(--radiant-cyan)] text-[9px] mb-8 tracking-widest uppercase font-bold">Science / Causality</h5>
+                        <h4 class="text-3xl font-bold serif mb-6 italic">Causal Lift Analysis</h4>
+                        <p class="text-gray-400 text-sm font-light leading-relaxed mb-8">
+                            Quantifying feature ROI by identifying a 700% bias over-estimation in correlational data. Implemented Propensity Score Matching.
                         </p>
-                        <div class="flex gap-4 text-coral font-bold text-[10px] mono">
-                            <span>95.5% ACCURACY</span>
-                            <span>PSM MATCHING</span>
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[9px] mono">CausalML</span>
+                            <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[9px] mono">Statistics</span>
                         </div>
                     </div>
-                    <a href="https://github.com/Hercodes-ux/Causal-Inference-Incremental-Lift-Analysis" class="mt-12 block border-b border-[var(--radiant-cyan)] pb-2 text-[var(--radiant-cyan)] font-bold text-xs group-hover:pl-4 transition-all">VIEW METHODOLOGY →</a>
+                    <a href="https://github.com/Hercodes-ux/Causal-Inference-Incremental-Lift-Analysis" class="text-[var(--radiant-cyan)] font-bold text-[10px] tracking-widest border-b border-[var(--radiant-cyan)] pb-2 w-fit">VIEW METHODOLOGY →</a>
                 </div>
 
-                <!-- Project 3: NLP Misinformation (Quantified) -->
-                <div class="glass-card p-10 flex flex-col justify-between group" data-aos="fade-up" data-aos-delay="200">
+                <!-- Project 3 -->
+                <div class="glass-card p-10 rounded-[48px] flex flex-col justify-between h-full" data-aos="fade-up" data-aos-delay="200">
                     <div>
-                        <div class="flex justify-between items-center mb-8">
-                            <span class="text-[var(--radiant-cyan)] mono text-[10px] tracking-tighter">TEXT INTELLIGENCE</span>
-                            <span class="text-white/20 text-xs italic">2025</span>
-                        </div>
+                        <h5 class="mono text-[var(--radiant-cyan)] text-[9px] mb-8 tracking-widest uppercase font-bold">Intelligence / NLP</h5>
                         <h4 class="text-3xl font-bold serif mb-6 italic">NLP Sentinel</h4>
-                        <p class="text-gray-400 text-sm leading-relaxed mb-6">
-                            Modular pipeline detecting deception across 44k articles. Optimized Logistic Regression for high-precision content scoring.
+                        <p class="text-gray-400 text-sm font-light leading-relaxed mb-8">
+                            Modular classification pipeline detecting deception across 44,000 articles. Engineered for high-precision content scoring.
                         </p>
-                        <div class="flex gap-4 text-coral font-bold text-[10px] mono">
-                            <span>94% F1-SCORE</span>
-                            <span>TF-IDF OPTIMIZED</span>
+                        <div class="flex flex-wrap gap-2 mb-8">
+                            <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[9px] mono">NLP</span>
+                            <span class="bg-white/5 border border-white/10 px-3 py-1 rounded-full text-[9px] mono">Scikit-Learn</span>
                         </div>
                     </div>
-                    <a href="https://github.com/Hercodes-ux/NLP-Misinformation-Detection-System" class="mt-12 block border-b border-[var(--radiant-cyan)] pb-2 text-[var(--radiant-cyan)] font-bold text-xs group-hover:pl-4 transition-all">VIEW PIPELINE →</a>
+                    <a href="https://github.com/Hercodes-ux/NLP-Misinformation-Detection-System" class="text-[var(--radiant-cyan)] font-bold text-[10px] tracking-widest border-b border-[var(--radiant-cyan)] pb-2 w-fit">VIEW PIPELINE →</a>
                 </div>
 
             </div>
         </div>
     </section>
 
-    <!-- FOOTER / CONTACT -->
-    <footer id="contact" class="py-32 px-10 text-center relative">
-        <div class="glow-node bottom-[-10%] right-[-5%] opacity-50"></div>
-        <h2 class="serif text-5xl italic mb-12">Let's build something <span class="text-[var(--radiant-cyan)]">Substantial.</span></h2>
-        <div class="flex flex-wrap justify-center gap-8 mb-16">
-            <a href="mailto:rayavarapu.harshini@gmail.com" class="mono text-xs hover:text-[var(--radiant-cyan)] transition-all underline">EMAIL</a>
-            <a href="https://linkedin.com/in/sai-venkata-harshini-rayavarapu" class="mono text-xs hover:text-[var(--radiant-cyan)] transition-all underline">LINKEDIN</a>
-            <a href="https://github.com/Hercodes-ux" class="mono text-xs hover:text-[var(--radiant-cyan)] transition-all underline">GITHUB</a>
+    <!-- FOOTER / IDENTITY RECAP -->
+    <footer id="contact" class="py-32 px-10 text-center">
+        <h2 class="serif text-5xl mb-12 italic tracking-tighter">Connecting the <span class="text-[var(--radiant-cyan)]">Dots.</span></h2>
+        <div class="flex justify-center gap-12 mb-20 opacity-60 font-bold uppercase text-[9px] tracking-[0.3em]">
+            <a href="mailto:rayavarapu.harshini@gmail.com" class="hover:text-[var(--radiant-cyan)]">Email</a>
+            <a href="https://linkedin.com/in/sai-venkata-harshini-rayavarapu" class="hover:text-[var(--radiant-cyan)]">LinkedIn</a>
+            <a href="https://github.com/Hercodes-ux" class="hover:text-[var(--radiant-cyan)]">GitHub</a>
         </div>
-        <p class="text-[9px] mono opacity-30 tracking-[0.4em] uppercase">© 2026 Sai Venkata Harshini · Cleveland, OH</p>
+        <p class="mono text-[8px] opacity-20 uppercase tracking-[0.5em]">© 2026 Sai Venkata Harshini · Neural Architect</p>
     </footer>
 
     <script>
-        AOS.init({ duration: 1200, once: true });
+        AOS.init({ duration: 1000, once: true });
 
-        // Generate Deep Sea Bubbles
-        const container = document.getElementById('bubble-container');
-        for(let i=0; i<20; i++) {
+        // Bubble Field Generator
+        const container = document.getElementById('bubble-field');
+        for(let i=0; i<25; i++) {
             const b = document.createElement('div');
             b.className = 'bubble';
-            const size = Math.random() * 20 + 5;
+            const size = Math.random() * 30 + 10;
             b.style.width = size + 'px';
             b.style.height = size + 'px';
             b.style.left = Math.random() * 100 + '%';
             b.style.animationDuration = (Math.random() * 10 + 10) + 's';
-            b.style.animationDelay = Math.random() * 10 + 's';
+            b.style.animationDelay = Math.random() * 5 + 's';
             container.appendChild(b);
         }
+
+        // Scroll Navbar Effect
+        window.onscroll = function() {
+            const nav = document.getElementById('navbar');
+            if (window.pageYOffset > 50) {
+                nav.style.background = "rgba(4, 13, 22, 0.9)";
+                nav.style.backdropFilter = "blur(10px)";
+            } else {
+                nav.style.background = "transparent";
+                nav.style.backdropFilter = "none";
+            }
+        };
     </script>
 </body>
 </html>
