@@ -1,0 +1,101 @@
+<svg viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustrated portrait avatar">
+  <defs>
+    <radialGradient id="bgGlow" cx="50%" cy="35%" r="75%">
+      <stop offset="0%" stop-color="#1c5a67"/>
+      <stop offset="55%" stop-color="#0e3743"/>
+      <stop offset="100%" stop-color="#06232c"/>
+    </radialGradient>
+    <linearGradient id="hairGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2b1f2e"/>
+      <stop offset="100%" stop-color="#150f1c"/>
+    </linearGradient>
+    <linearGradient id="skinGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#eec9a4"/>
+      <stop offset="100%" stop-color="#dcae82"/>
+    </linearGradient>
+    <linearGradient id="topGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#2f7d84"/>
+      <stop offset="100%" stop-color="#1a545c"/>
+    </linearGradient>
+    <radialGradient id="cheekGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#e8927a" stop-opacity="0.55"/>
+      <stop offset="100%" stop-color="#e8927a" stop-opacity="0"/>
+    </radialGradient>
+    <clipPath id="circleClip">
+      <circle cx="200" cy="200" r="196"/>
+    </clipPath>
+  </defs>
+
+  <circle cx="200" cy="200" r="198" fill="url(#bgGlow)"/>
+
+  <g clip-path="url(#circleClip)">
+    <!-- ambient bubbles -->
+    <g fill="#EAF6F4" opacity="0.18">
+      <circle cx="65" cy="90" r="6"/>
+      <circle cx="335" cy="120" r="9"/>
+      <circle cx="350" cy="290" r="5"/>
+      <circle cx="45" cy="310" r="7"/>
+      <circle cx="90" cy="60" r="3"/>
+      <circle cx="310" cy="60" r="4"/>
+    </g>
+    <!-- bioluminescent flecks -->
+    <g fill="#6EE7D8">
+      <circle cx="70" cy="200" r="2.4" opacity="0.8"/>
+      <circle cx="330" cy="220" r="2" opacity="0.7"/>
+      <circle cx="60" cy="260" r="1.6" opacity="0.6"/>
+      <circle cx="345" cy="170" r="1.8" opacity="0.6"/>
+    </g>
+
+    <!-- flowing hair back layer -->
+    <path d="M110 150 C 60 190, 55 300, 95 400 L 305 400 C 345 300, 340 190, 290 150 C 300 90, 255 55, 200 55 C 145 55, 100 90, 110 150 Z" fill="url(#hairGrad)"/>
+    <!-- teal streak in hair -->
+    <path d="M100 170 C 80 230, 85 320, 115 400 L 135 400 C 108 320, 105 230, 122 168 Z" fill="#3f8f8a" opacity="0.55"/>
+
+    <!-- shoulders / top -->
+    <path d="M120 330 C 120 290, 155 268, 200 268 C 245 268, 280 290, 280 330 L 292 400 L 108 400 Z" fill="url(#topGrad)"/>
+    <path d="M170 275 L 200 300 L 230 275 L 222 265 L 200 282 L 178 265 Z" fill="#e7f6f2" opacity="0.85"/>
+
+    <!-- neck -->
+    <rect x="178" y="245" width="44" height="45" rx="14" fill="url(#skinGrad)"/>
+
+    <!-- face -->
+    <ellipse cx="200" cy="185" rx="78" ry="88" fill="url(#skinGrad)"/>
+
+    <!-- ears -->
+    <ellipse cx="126" cy="190" rx="10" ry="15" fill="#dcae82"/>
+    <ellipse cx="274" cy="190" rx="10" ry="15" fill="#dcae82"/>
+
+    <!-- front hair / bangs -->
+    <path d="M118 150 C 110 100, 150 60, 200 60 C 250 60, 290 100, 282 150 C 270 120, 245 100, 200 98 C 155 100, 130 120, 118 150 Z" fill="url(#hairGrad)"/>
+    <path d="M124 150 C 128 118, 150 100, 168 96 C 148 130, 140 165, 142 200 C 122 185, 116 165, 124 150 Z" fill="url(#hairGrad)"/>
+    <path d="M276 150 C 272 118, 250 100, 232 96 C 252 130, 260 165, 258 200 C 278 185, 284 165, 276 150 Z" fill="url(#hairGrad)"/>
+
+    <!-- small earrings -->
+    <circle cx="126" cy="208" r="3.4" fill="#6EE7D8"/>
+    <circle cx="274" cy="208" r="3.4" fill="#6EE7D8"/>
+
+    <!-- cheeks -->
+    <ellipse cx="160" cy="205" rx="20" ry="13" fill="url(#cheekGrad)"/>
+    <ellipse cx="240" cy="205" rx="20" ry="13" fill="url(#cheekGrad)"/>
+
+    <!-- eyebrows -->
+    <path d="M148 168 Q 165 158, 182 166" stroke="#2b1f2e" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M218 166 Q 235 158, 252 168" stroke="#2b1f2e" stroke-width="4" fill="none" stroke-linecap="round"/>
+
+    <!-- eyes: calm, closed-soft almond shape -->
+    <path d="M150 186 Q 165 178, 180 186 Q 165 194, 150 186 Z" fill="#241a1a"/>
+    <path d="M220 186 Q 235 178, 250 186 Q 235 194, 220 186 Z" fill="#241a1a"/>
+    <circle cx="169" cy="184" r="2" fill="#eaf6f4" opacity="0.85"/>
+    <circle cx="239" cy="184" r="2" fill="#eaf6f4" opacity="0.85"/>
+
+    <!-- nose -->
+    <path d="M198 195 Q 194 210, 200 214" stroke="#c98f66" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+    <!-- mouth: gentle smile -->
+    <path d="M180 228 Q 200 240, 220 228" stroke="#a85a4f" stroke-width="4" fill="none" stroke-linecap="round"/>
+  </g>
+
+  <!-- glow ring -->
+  <circle cx="200" cy="200" r="196" fill="none" stroke="#6EE7D8" stroke-opacity="0.45" stroke-width="2.5"/>
+  <circle cx="200" cy="200" r="188" fill="none" stroke="#EAF6F4" stroke-opacity="0.08" stroke-width="1"/>
+</svg>
