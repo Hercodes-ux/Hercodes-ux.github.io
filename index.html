@@ -477,7 +477,7 @@ footer .gg{font-family:var(--display);font-size:9px;color:var(--border-lit);marg
           <ul>
             <li>Two-stage retrieval-and-ranking pipeline: a two-tower network embeds users and items into a shared 64-dimensional space for candidate generation.</li>
             <li>FAISS flat inner-product exact search sustaining <strong>sub-50ms p95 latency across a 1M-item catalog</strong> on a single node.</li>
-            <li>Shipped as a containerized FastAPI service with a live dashboard exposing normalized match confidence.</li>
+            <li>Built a containerized FastAPI service (Docker) to serve ranked results.</li>
           </ul>
           <div class="meters">
             <div class="meter"><span class="meter__k">SCALE</span><div class="meter__track"><div class="meter__fill" style="right:8%"></div></div><span class="meter__v">1M items</span></div>
