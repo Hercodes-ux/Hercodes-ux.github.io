@@ -1,0 +1,709 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Causal Analytics — Naive vs. True Lift</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f6f4ef;
+        --surface: #fffdf9;
+        --surface-2: #efeadf;
+        --ink: #1c1a16;
+        --ink-2: #57534a;
+        --line: #ddd6c8;
+        --naive: #c93a1e;
+        --naive-soft: rgba(201, 58, 30, 0.13);
+        --causal: #0d7a5f;
+        --causal-soft: rgba(13, 122, 95, 0.12);
+        --truth: #a86e00;
+        --truth-soft: rgba(168, 110, 0, 0.14);
+        --control: #64748b;
+        --control-soft: rgba(100, 116, 139, 0.16);
+        --shadow: 0 1px 2px rgba(28, 26, 22, 0.06), 0 8px 24px rgba(28, 26, 22, 0.06);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #131110;
+          --surface: #1d1a17;
+          --surface-2: #26221e;
+          --ink: #f0eadf;
+          --ink-2: #b3aa9a;
+          --line: #3a352e;
+          --naive: #ff6b4a;
+          --naive-soft: rgba(255, 107, 74, 0.15);
+          --causal: #2fbf9b;
+          --causal-soft: rgba(47, 191, 155, 0.14);
+          --truth: #e8b13c;
+          --truth-soft: rgba(232, 177, 60, 0.15);
+          --control: #94a3b8;
+          --control-soft: rgba(148, 163, 184, 0.18);
+          --shadow: 0 1px 2px rgba(0, 0, 0, 0.4), 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "IBM Plex Sans", system-ui, sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+      main { max-width: 920px; margin: 0 auto; padding: 28px 20px 64px; }
+      section { margin-top: 56px; }
+      h1 {
+        font-size: clamp(30px, 6vw, 46px);
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+        margin: 10px 0 12px;
+        font-weight: 700;
+      }
+      h2 {
+        font-size: clamp(21px, 4vw, 27px);
+        letter-spacing: -0.015em;
+        margin: 0 0 6px;
+        font-weight: 700;
+      }
+      .lede { font-size: clamp(16px, 2.6vw, 19px); color: var(--ink-2); margin: 0; max-width: 640px; }
+      .kicker {
+        font-size: 12.5px; font-weight: 600; letter-spacing: 0.14em;
+        text-transform: uppercase; color: var(--ink-2); margin: 0;
+      }
+      .sub { color: var(--ink-2); margin: 0 0 18px; max-width: 660px; font-size: 15.5px; }
+
+      /* Simulated-data notice */
+      .notice {
+        display: flex; gap: 12px; align-items: flex-start;
+        background: var(--truth-soft);
+        border: 1px solid var(--truth);
+        border-radius: 10px;
+        padding: 13px 16px;
+        margin-top: 22px;
+        font-size: 14.5px;
+      }
+      .notice strong { color: var(--truth); }
+      .notice p { margin: 0; }
+      .notice .dot {
+        flex: 0 0 auto; width: 10px; height: 10px; border-radius: 50%;
+        background: var(--truth); margin-top: 6px;
+      }
+
+      /* Hero comparison */
+      .hero-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: var(--shadow);
+        padding: clamp(18px, 4vw, 30px);
+        margin-top: 26px;
+      }
+      .seg {
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+        background: var(--surface-2); border-radius: 12px; padding: 6px;
+      }
+      .seg button {
+        appearance: none; border: 0; cursor: pointer;
+        background: transparent; color: var(--ink-2);
+        font: inherit; font-weight: 600; font-size: clamp(13px, 2.6vw, 15px);
+        padding: 12px 6px; border-radius: 8px; min-height: 48px;
+        transition: background 0.2s, color 0.2s;
+      }
+      .seg button .seg-sub { display: block; font-weight: 500; font-size: 11.5px; opacity: 0.75; margin-top: 1px; }
+      .seg button[aria-pressed="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+      .seg button[data-mode="naive"][aria-pressed="true"] { color: var(--naive); }
+      .seg button[data-mode="causal"][aria-pressed="true"] { color: var(--causal); }
+      .seg button[data-mode="truth"][aria-pressed="true"] { color: var(--truth); }
+      .seg button:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
+      .readout { text-align: center; padding: 26px 0 6px; }
+      .readout .big {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: clamp(58px, 13vw, 92px);
+        font-weight: 600; line-height: 1; letter-spacing: -0.03em;
+      }
+      .readout .unit { font-size: clamp(16px, 3.4vw, 22px); color: var(--ink-2); font-weight: 500; margin-top: 6px; }
+      .readout .verdict { font-size: clamp(15px, 3vw, 17.5px); font-weight: 600; margin: 14px auto 0; max-width: 560px; }
+      .readout .verdict-detail { color: var(--ink-2); font-size: 14.5px; margin: 6px auto 0; max-width: 560px; }
+      .mode-naive .big, .mode-naive .verdict { color: var(--naive); }
+      .mode-causal .big, .mode-causal .verdict { color: var(--causal); }
+      .mode-truth .big, .mode-truth .verdict { color: var(--truth); }
+
+      .bars { margin-top: 26px; display: grid; gap: 14px; }
+      .bar-row { display: grid; grid-template-columns: 118px 1fr 74px; align-items: center; gap: 12px; transition: opacity 0.3s; }
+      .bar-row.dim { opacity: 0.32; }
+      .bar-row .blabel { font-size: 13.5px; font-weight: 600; text-align: right; line-height: 1.25; }
+      .bar-row .blabel span { display: block; font-weight: 500; color: var(--ink-2); font-size: 11.5px; }
+      .bar-track { background: var(--surface-2); border-radius: 6px; height: 30px; overflow: hidden; }
+      .bar-fill { height: 100%; border-radius: 6px; width: 0; transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+      .fill-naive { background: var(--naive); }
+      .fill-causal { background: var(--causal); }
+      .fill-truth { background: var(--truth); }
+      .bar-row .bval { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 16px; }
+      @media (max-width: 560px) {
+        .bar-row { grid-template-columns: 86px 1fr 62px; gap: 8px; }
+        .bar-row .blabel { font-size: 12px; }
+        .bar-row .bval { font-size: 14px; }
+      }
+
+      /* Counts strip */
+      .counts {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 22px;
+      }
+      .count {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 12px;
+        padding: 14px 12px; text-align: center;
+      }
+      .count .n { font-family: "IBM Plex Mono", monospace; font-size: clamp(20px, 4.6vw, 27px); font-weight: 600; }
+      .count .l { font-size: 12px; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+      @media (max-width: 560px) { .counts { grid-template-columns: repeat(2, 1fr); } }
+
+      /* Chart cards */
+      .card {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 16px;
+        box-shadow: var(--shadow); padding: clamp(16px, 3.6vw, 26px);
+      }
+      .legend { display: flex; flex-wrap: wrap; gap: 16px; margin: 4px 0 10px; font-size: 13.5px; font-weight: 500; }
+      .legend .key { display: inline-flex; align-items: center; gap: 7px; }
+      .swatch { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+      .sw-treated { background: var(--naive); }
+      .sw-control { background: var(--control); }
+      .sw-twin { background: var(--causal); }
+      .sw-truth { background: var(--truth); }
+      svg.chart { width: 100%; height: auto; display: block; }
+      svg.chart text { font-family: "IBM Plex Mono", monospace; fill: var(--ink-2); }
+      .axis-note { font-size: 13px; color: var(--ink-2); margin: 10px 0 0; }
+      .callout {
+        display: flex; gap: 10px; align-items: flex-start; margin-top: 16px;
+        background: var(--naive-soft); border-radius: 10px; padding: 12px 14px; font-size: 14.5px;
+      }
+      .callout.good { background: var(--causal-soft); }
+      .callout p { margin: 0; }
+      .callout .big-inline { font-family: "IBM Plex Mono", monospace; font-weight: 600; }
+
+      /* Means comparison */
+      .mean-row { display: grid; grid-template-columns: 128px 1fr 70px; align-items: center; gap: 12px; margin-top: 12px; }
+      .mean-row .mlabel { font-size: 13.5px; font-weight: 600; text-align: right; line-height: 1.25; }
+      .mean-row .mlabel span { display: block; font-weight: 500; color: var(--ink-2); font-size: 11.5px; }
+      .mean-track { background: var(--surface-2); border-radius: 6px; height: 34px; overflow: hidden; }
+      .mean-fill { height: 100%; width: 0; border-radius: 6px; transition: width 0.9s cubic-bezier(0.22, 1, 0.36, 1); }
+      .mean-row .mval { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 16px; }
+      @media (max-width: 560px) {
+        .mean-row { grid-template-columns: 92px 1fr 58px; gap: 8px; }
+        .mean-row .mval { font-size: 14px; }
+      }
+      .gap-tags { display: grid; gap: 10px; margin-top: 18px; }
+      @media (min-width: 640px) { .gap-tags { grid-template-columns: 1fr 1fr; } }
+      .gap-tag { border-radius: 10px; padding: 12px 14px; font-size: 14.5px; }
+      .gap-tag.bad { background: var(--naive-soft); }
+      .gap-tag.good { background: var(--causal-soft); }
+      .gap-tag .gt { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 19px; display: block; }
+      .gap-tag.bad .gt { color: var(--naive); }
+      .gap-tag.good .gt { color: var(--causal); }
+
+      /* Pairs explorer */
+      .pairs-layout { display: grid; gap: 18px; }
+      @media (min-width: 760px) { .pairs-layout { grid-template-columns: 240px 1fr; } }
+      .pair-list { display: grid; gap: 6px; align-content: start; }
+      @media (max-width: 759px) { .pair-list { grid-template-columns: repeat(2, 1fr); } }
+      .pair-btn {
+        appearance: none; cursor: pointer; text-align: left;
+        background: var(--surface-2); border: 1px solid transparent; border-radius: 10px;
+        padding: 9px 12px; font: inherit; color: var(--ink); min-height: 48px;
+        transition: border-color 0.15s, background 0.15s;
+      }
+      .pair-btn .pb-id { font-weight: 600; font-size: 14px; display: block; }
+      .pair-btn .pb-sub { font-size: 12px; color: var(--ink-2); font-family: "IBM Plex Mono", monospace; }
+      .pair-btn[aria-pressed="true"] { background: var(--surface); border-color: var(--ink); box-shadow: var(--shadow); }
+      .pair-btn:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+      .pair-detail { min-height: 240px; }
+      .person { border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+      .person + .person { margin-top: 10px; }
+      .person .who { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+      .person .who .name { font-weight: 700; font-size: 15px; }
+      .person .who .tag { font-size: 11.5px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; }
+      .tag-treated { background: var(--naive-soft); color: var(--naive); }
+      .tag-twin { background: var(--causal-soft); color: var(--causal); }
+      .stat-line { display: grid; grid-template-columns: 108px 1fr 76px; gap: 10px; align-items: center; margin-top: 10px; font-size: 13px; }
+      .stat-line .sl { color: var(--ink-2); font-weight: 500; }
+      .stat-line .sv { font-family: "IBM Plex Mono", monospace; font-weight: 600; text-align: right; font-size: 14px; }
+      .mini-track { background: var(--surface-2); border-radius: 4px; height: 12px; overflow: hidden; }
+      .mini-fill { height: 100%; border-radius: 4px; transition: width 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+      @media (max-width: 560px) { .stat-line { grid-template-columns: 88px 1fr 66px; } }
+      .pair-lift {
+        margin-top: 14px; border-radius: 12px; padding: 14px 16px; text-align: center;
+        background: var(--causal-soft);
+      }
+      .pair-lift.neg { background: var(--naive-soft); }
+      .pair-lift .pl-n { font-family: "IBM Plex Mono", monospace; font-size: 34px; font-weight: 600; line-height: 1.1; }
+      .pair-lift .pl-l { font-size: 13px; color: var(--ink-2); font-weight: 500; }
+      .match-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 18px; }
+      @media (max-width: 640px) { .match-stats { grid-template-columns: repeat(2, 1fr); } }
+      .match-stat { background: var(--surface-2); border-radius: 10px; padding: 12px; text-align: center; }
+      .match-stat .n { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 20px; }
+      .match-stat .l { font-size: 11.5px; color: var(--ink-2); margin-top: 2px; line-height: 1.35; }
+
+      /* Distribution stats */
+      .dist-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-top: 16px; }
+      @media (max-width: 640px) { .dist-stats { grid-template-columns: repeat(2, 1fr); } }
+      .dist-stat { background: var(--surface-2); border-radius: 10px; padding: 12px; text-align: center; }
+      .dist-stat .n { font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 19px; }
+      .dist-stat .l { font-size: 11.5px; color: var(--ink-2); margin-top: 2px; }
+
+      /* Method */
+      .method-grid { display: grid; gap: 12px; }
+      @media (min-width: 640px) { .method-grid { grid-template-columns: 1fr 1fr; } }
+      .method {
+        border: 1px solid var(--line); border-radius: 12px; padding: 16px 18px; background: var(--surface);
+      }
+      .method h3 { margin: 0 0 8px; font-size: 15px; }
+      .method.bad h3 { color: var(--naive); }
+      .method.good h3 { color: var(--causal); }
+      .formula {
+        font-family: "IBM Plex Mono", monospace; font-size: 13.5px;
+        background: var(--surface-2); border-radius: 8px; padding: 10px 12px; margin: 0 0 10px;
+        white-space: normal; overflow-wrap: anywhere;
+      }
+      .method p { margin: 0; font-size: 14px; color: var(--ink-2); }
+      .truth-box {
+        margin-top: 12px; border: 1px dashed var(--truth); border-radius: 12px;
+        padding: 16px 18px; background: var(--truth-soft);
+      }
+      .truth-box h3 { margin: 0 0 8px; font-size: 15px; color: var(--truth); }
+      .truth-box p { margin: 0; font-size: 14.5px; }
+      .truth-box .formula { background: var(--surface); margin-top: 10px; }
+
+      footer { margin-top: 56px; border-top: 1px solid var(--line); padding-top: 20px; color: var(--ink-2); font-size: 14px; }
+      footer a { color: var(--ink); font-weight: 600; }
+      footer p { margin: 0 0 8px; }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .bar-fill, .mean-fill, .mini-fill { transition: none; }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <header>
+        <p class="kicker">Causal Analytics · Incremental Lift Analysis</p>
+        <h1>The feature looked like a hit.<br />It mostly wasn&rsquo;t.</h1>
+        <p class="lede">A new streaming feature seemed to add <strong>+15.44 hours</strong> of watch time per user. Propensity score matching shows the real effect is <strong>+1.91 hours</strong> — the rest was loyalty that was already there. Flip between the three answers below.</p>
+        <div class="notice" role="note">
+          <span class="dot" aria-hidden="true"></span>
+          <p><strong>Honest framing:</strong> the dataset is <strong>simulated</strong> — 5,000 synthetic users generated by this project&rsquo;s own data generator (seed&nbsp;42), with a known true effect built in. The method is real, and every number on this page comes from running the actual analysis code.</p>
+        </div>
+      </header>
+
+      <!-- ============ HERO COMPARISON ============ -->
+      <div class="hero-card mode-naive" id="heroCard">
+        <div class="seg" role="group" aria-label="Choose which lift estimate to view">
+          <button type="button" data-mode="naive" aria-pressed="true">Naive<span class="seg-sub">raw comparison</span></button>
+          <button type="button" data-mode="causal" aria-pressed="false">Causal (PSM)<span class="seg-sub">after matching</span></button>
+          <button type="button" data-mode="truth" aria-pressed="false">Ground truth<span class="seg-sub">built into the data</span></button>
+        </div>
+
+        <div class="readout" aria-live="polite">
+          <div class="big"><span id="bigNum">15.44</span></div>
+          <div class="unit" id="bigUnit">extra watch-hours per user — the naive claim</div>
+          <p class="verdict" id="verdict">Wrong. It overstates the true lift by 672.1%.</p>
+          <p class="verdict-detail" id="verdictDetail">The raw comparison credits the feature for hours that loyal users would have watched anyway.</p>
+        </div>
+
+        <div class="bars" aria-hidden="true">
+          <div class="bar-row" data-row="naive">
+            <div class="blabel">Naive<span>no adjustment</span></div>
+            <div class="bar-track"><div class="bar-fill fill-naive" data-w="96.5"></div></div>
+            <div class="bval">15.44</div>
+          </div>
+          <div class="bar-row dim" data-row="causal">
+            <div class="blabel">Causal<span>matched (ATT)</span></div>
+            <div class="bar-track"><div class="bar-fill fill-causal" data-w="11.9"></div></div>
+            <div class="bval">1.91</div>
+          </div>
+          <div class="bar-row dim" data-row="truth">
+            <div class="blabel">Truth<span>known effect</span></div>
+            <div class="bar-track"><div class="bar-fill fill-truth" data-w="12.5"></div></div>
+            <div class="bval">2.00</div>
+          </div>
+        </div>
+
+        <div class="counts">
+          <div class="count"><div class="n">5,000</div><div class="l">simulated users</div></div>
+          <div class="count"><div class="n">2,018</div><div class="l">used the feature (40.4%)</div></div>
+          <div class="count"><div class="n">2,982</div><div class="l">control users</div></div>
+          <div class="count"><div class="n">2,018</div><div class="l">matched pairs — every treated user matched</div></div>
+        </div>
+      </div>
+
+      <!-- ============ WHY: LOYALTY HISTOGRAM ============ -->
+      <section class="reveal">
+        <p class="kicker">Why the naive answer is wrong</p>
+        <h2>The two groups were never comparable</h2>
+        <p class="sub">Users who adopted the feature were already the platform&rsquo;s biggest fans. Their loyalty scores pile up at the high end; control users spread the other way. Comparing their watch time raw compares loyalty, not the feature.</p>
+        <div class="card">
+          <div class="legend">
+            <span class="key"><span class="swatch sw-treated"></span>Used the feature (n = 2,018)</span>
+            <span class="key"><span class="swatch sw-control"></span>Control (n = 2,982)</span>
+          </div>
+          <svg class="chart" id="histChart" viewBox="0 0 640 292" role="img" aria-label="Histogram of loyalty scores in 10 bins from 0 to 100. Treated users cluster at high loyalty: 365 in the 90–100 bin versus 114 controls. Controls cluster low: 483 in the 0–10 bin versus 42 treated."></svg>
+          <p class="axis-note">Loyalty score (0–100), users per 10-point bin. Average loyalty: <strong class="mono">65.72</strong> treated vs <strong class="mono">38.83</strong> control.</p>
+          <div class="callout">
+            <p>The generator built this trap in on purpose — &ldquo;superfan bias&rdquo;: loyal users were <span class="big-inline">3&times;</span> more likely to use the feature, and every loyalty point adds watch time on its own. Any raw comparison inherits that bias.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ WATCH-TIME MEANS ============ -->
+      <section class="reveal">
+        <p class="kicker">Same users, fairer comparison</p>
+        <h2>Compare treated users to their twins, not to everyone</h2>
+        <p class="sub">Each treated user was matched to a control &ldquo;twin&rdquo; with a near-identical loyalty score. The twins watch almost as much as the treated users — so almost all of the naive gap was loyalty, not the feature.</p>
+        <div class="card">
+          <div class="mean-row">
+            <div class="mlabel">Treated<span>used the feature</span></div>
+            <div class="mean-track"><div class="mean-fill fill-naive grow" data-w="100"></div></div>
+            <div class="mval">44.91</div>
+          </div>
+          <div class="mean-row">
+            <div class="mlabel">Matched twins<span>control, same loyalty</span></div>
+            <div class="mean-track"><div class="mean-fill fill-causal grow" data-w="95.8"></div></div>
+            <div class="mval">43.01</div>
+          </div>
+          <div class="mean-row">
+            <div class="mlabel">All control<span>unmatched average</span></div>
+            <div class="mean-track"><div class="mean-fill grow" data-w="65.6" style="background: var(--control);"></div></div>
+            <div class="mval">29.47</div>
+          </div>
+          <p class="axis-note">Mean watch time, hours per user.</p>
+          <div class="gap-tags">
+            <div class="gap-tag bad"><span class="gt">44.91 − 29.47 = 15.44 hrs</span>Treated minus <em>all</em> control — the naive gap. It mixes the feature&rsquo;s effect with a 26.9-point loyalty advantage.</div>
+            <div class="gap-tag good"><span class="gt">44.9144 − 43.0078 = 1.9066 ≈ 1.91 hrs</span>Treated minus their <em>twins</em> — loyalty held equal, so what&rsquo;s left is the feature itself.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ MATCHED PAIRS ============ -->
+      <section class="reveal">
+        <p class="kicker">The fix, pair by pair</p>
+        <h2>Meet the twins</h2>
+        <p class="sub">Propensity score matching: loyalty standardized with StandardScaler, nearest neighbour found with sklearn&rsquo;s NearestNeighbors (k&nbsp;=&nbsp;1). All 2,018 treated users got a twin. These are 10 real pairs from the run — tap one.</p>
+        <div class="card">
+          <div class="pairs-layout">
+            <div class="pair-list" id="pairList" role="group" aria-label="Sample matched pairs"></div>
+            <div class="pair-detail" id="pairDetail" aria-live="polite"></div>
+          </div>
+          <div class="match-stats">
+            <div class="match-stat"><div class="n">0.023</div><div class="l">mean loyalty gap, treated vs twin (points)</div></div>
+            <div class="match-stat"><div class="n">0.015</div><div class="l">median gap</div></div>
+            <div class="match-stat"><div class="n">0.073</div><div class="l">95th-percentile gap</div></div>
+            <div class="match-stat"><div class="n">0.226</div><div class="l">worst gap — on a 0–100 scale</div></div>
+          </div>
+          <div class="callout good">
+            <p>After matching, the twins&rsquo; average loyalty is <span class="big-inline">65.72</span> — identical to the treated group&rsquo;s <span class="big-inline">65.72</span>. The comparison is finally apples to apples.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ PAIR-LIFT DISTRIBUTION ============ -->
+      <section class="reveal">
+        <p class="kicker">The answer, with its spread</p>
+        <h2>2,018 pair-level lifts, averaged: 1.91 hrs</h2>
+        <p class="sub">Each pair contributes one lift — treated watch time minus twin watch time. Individual pairs vary (noise is real), but the average lands within 0.09 hours of the truth. Dots are the 10 sample pairs above.</p>
+        <div class="card">
+          <svg class="chart" id="distChart" viewBox="0 0 640 190" role="img" aria-label="Number line of pair-level lifts from minus 6.75 to plus 11.89 hours. Mean 1.91, median 1.82, standard deviation 2.89. Sample pair dots cluster between 0 and 7 hours."></svg>
+          <div class="dist-stats">
+            <div class="dist-stat"><div class="n">1.9065</div><div class="l">mean (the ATT)</div></div>
+            <div class="dist-stat"><div class="n">1.8175</div><div class="l">median</div></div>
+            <div class="dist-stat"><div class="n">2.8946</div><div class="l">std. deviation</div></div>
+            <div class="dist-stat"><div class="n">−6.75</div><div class="l">minimum pair lift</div></div>
+            <div class="dist-stat"><div class="n">11.89</div><div class="l">maximum pair lift</div></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ METHOD ============ -->
+      <section class="reveal">
+        <p class="kicker">Method</p>
+        <h2>Two subtractions — one of them is causal</h2>
+        <div class="method-grid">
+          <div class="method bad">
+            <h3>Naive lift — biased</h3>
+            <p class="formula">mean(treated watch) − mean(control watch)</p>
+            <p>44.91 − 29.47 = <strong class="mono">15.44 hrs</strong>. Assumes the two groups were alike before the feature. They weren&rsquo;t — treated users averaged 65.72 loyalty vs 38.83.</p>
+          </div>
+          <div class="method good">
+            <h3>Causal lift (ATT) — matched</h3>
+            <p class="formula">mean over pairs of (treated watch − twin watch)</p>
+            <p>Average of 2,018 within-pair differences = <strong class="mono">1.9065 hrs</strong>. Each treated user is compared only with a control user of near-identical loyalty, so the loyalty effect cancels.</p>
+          </div>
+        </div>
+        <div class="truth-box">
+          <h3>Why we know the truth here</h3>
+          <p>Because the data is simulated, the generator&rsquo;s formula is known — the one luxury real data never gives you. The estimate recovered 95.3% of it (error: −0.0935 hrs).</p>
+          <p class="formula">watch_time = 10 + 2.0 × used_feature + 0.5 × loyalty + noise</p>
+        </div>
+      </section>
+
+      <footer>
+        <p><strong>Causal Analytics — Incremental Lift Analysis</strong> by Harshini Rayavarapu. Propensity score matching in Python (scikit-learn), run on a simulated dataset of 5,000 users (seed 42) with a built-in true effect of +2.00 hrs. Every figure on this page is from that run.</p>
+        <p><a href="https://github.com/Hercodes-ux/Causal-Inference-Incremental-Lift-Analysis" target="_blank" rel="noopener">View the project on GitHub</a></p>
+      </footer>
+    </main>
+
+    <script>
+      (function () {
+        "use strict";
+        var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+        /* ---------- Hero toggle ---------- */
+        var MODES = {
+          naive: {
+            num: 15.44, decimals: 2,
+            unit: "extra watch-hours per user — the naive claim",
+            verdict: "Wrong. It overstates the true lift by 672.1%.",
+            detail: "The raw comparison credits the feature for hours that loyal users would have watched anyway."
+          },
+          causal: {
+            num: 1.91, decimals: 2,
+            unit: "extra watch-hours per user — the causal estimate (ATT = 1.9065)",
+            verdict: "Right. Matching recovers 95.3% of the true effect.",
+            detail: "After each treated user is compared with a same-loyalty twin, +1.91 hrs is what the feature itself added."
+          },
+          truth: {
+            num: 2.00, decimals: 2,
+            unit: "extra watch-hours per user — the ground truth",
+            verdict: "The real effect, known because the data is simulated.",
+            detail: "The generator added exactly +2.00 hrs for feature use. A sound method should land here — matching lands at 1.91."
+          }
+        };
+        var heroCard = document.getElementById("heroCard");
+        var bigNum = document.getElementById("bigNum");
+        var bigUnit = document.getElementById("bigUnit");
+        var verdict = document.getElementById("verdict");
+        var verdictDetail = document.getElementById("verdictDetail");
+        var segBtns = heroCard.querySelectorAll(".seg button");
+        var rows = heroCard.querySelectorAll(".bar-row");
+        var animId = null;
+
+        function animateNum(from, to, decimals) {
+          if (reduced) { bigNum.textContent = to.toFixed(decimals); return; }
+          if (animId) cancelAnimationFrame(animId);
+          var start = null, dur = 550;
+          function step(ts) {
+            if (!start) start = ts;
+            var p = Math.min((ts - start) / dur, 1);
+            var eased = 1 - Math.pow(1 - p, 3);
+            bigNum.textContent = (from + (to - from) * eased).toFixed(decimals);
+            if (p < 1) animId = requestAnimationFrame(step);
+          }
+          animId = requestAnimationFrame(step);
+        }
+
+        var current = 15.44;
+        function setMode(mode) {
+          var m = MODES[mode];
+          heroCard.className = "hero-card mode-" + mode;
+          segBtns.forEach(function (b) { b.setAttribute("aria-pressed", b.dataset.mode === mode ? "true" : "false"); });
+          rows.forEach(function (r) { r.classList.toggle("dim", r.dataset.row !== mode); });
+          animateNum(current, m.num, m.decimals);
+          current = m.num;
+          bigUnit.textContent = m.unit;
+          verdict.textContent = m.verdict;
+          verdictDetail.textContent = m.detail;
+        }
+        segBtns.forEach(function (b) {
+          b.addEventListener("click", function () { setMode(b.dataset.mode); });
+        });
+
+        /* ---------- Bar grow on view ---------- */
+        function growBars(scope) {
+          scope.querySelectorAll(".bar-fill, .mean-fill.grow").forEach(function (el) {
+            el.style.width = el.dataset.w + "%";
+          });
+        }
+        growBars(heroCard);
+
+        /* ---------- Loyalty histogram (SVG) ---------- */
+        var T = [42, 58, 107, 151, 157, 215, 296, 281, 346, 365];
+        var C = [483, 446, 395, 351, 310, 284, 235, 190, 174, 114];
+        var BINS = ["0–10", "10–20", "20–30", "30–40", "40–50", "50–60", "60–70", "70–80", "80–90", "90–100"];
+        (function buildHist() {
+          var svg = document.getElementById("histChart");
+          var NS = "http://www.w3.org/2000/svg";
+          var W = 640, base = 252, top = 14, left = 38, right = 626;
+          var maxV = 500, plotH = base - top;
+          var binW = (right - left) / 10;
+          function el(name, attrs) {
+            var e = document.createElementNS(NS, name);
+            for (var k in attrs) e.setAttribute(k, attrs[k]);
+            return e;
+          }
+          // gridlines at 0, 250, 500
+          [0, 250, 500].forEach(function (v) {
+            var y = base - (v / maxV) * plotH;
+            svg.appendChild(el("line", { x1: left, x2: right, y1: y, y2: y, stroke: "var(--line)", "stroke-width": v === 0 ? 1.5 : 1 }));
+            var t = el("text", { x: left - 6, y: y + 4, "text-anchor": "end", "font-size": 11 });
+            t.textContent = v;
+            svg.appendChild(t);
+          });
+          for (var i = 0; i < 10; i++) {
+            var bx = left + i * binW;
+            var bw = binW / 2 - 3;
+            var th = (T[i] / maxV) * plotH, ch = (C[i] / maxV) * plotH;
+            svg.appendChild(el("rect", { x: bx + 2, y: base - ch, width: bw, height: ch, rx: 3, fill: "var(--control)", opacity: 0.85 }));
+            svg.appendChild(el("rect", { x: bx + binW / 2 + 1, y: base - th, width: bw, height: th, rx: 3, fill: "var(--naive)" }));
+            var lab = el("text", { x: bx + binW / 2, y: base + 18, "text-anchor": "middle", "font-size": 10.5 });
+            lab.textContent = BINS[i];
+            svg.appendChild(lab);
+          }
+          // value labels on the two extreme bins
+          var t1 = el("text", { x: left + 9 * binW + binW / 2 + 1 + (binW / 2 - 3) / 2, y: base - (365 / maxV) * plotH - 6, "text-anchor": "middle", "font-size": 12, "font-weight": 600, fill: "var(--naive)" });
+          t1.textContent = "365";
+          svg.appendChild(t1);
+          var t2 = el("text", { x: left + 2 + (binW / 2 - 3) / 2, y: base - (483 / maxV) * plotH - 6, "text-anchor": "middle", "font-size": 12, "font-weight": 600, fill: "var(--control)" });
+          t2.textContent = "483";
+          svg.appendChild(t2);
+          var cap = el("text", { x: (left + right) / 2, y: 288, "text-anchor": "middle", "font-size": 11.5 });
+          cap.textContent = "loyalty score →";
+          svg.appendChild(cap);
+        })();
+
+        /* ---------- Matched pairs explorer ---------- */
+        var PAIRS = [
+          { id: 287,  tl: 54.26, wl: 54.27, gap: 0.005, tw: 39.64, ww: 32.68, lift: 6.96 },
+          { id: 1127, tl: 40.85, wl: 40.85, gap: 0.0,   tw: 30.08, ww: 29.07, lift: 1.01 },
+          { id: 1479, tl: 43.56, wl: 43.61, gap: 0.054, tw: 34.36, ww: 32.15, lift: 2.20 },
+          { id: 2869, tl: 35.31, wl: 35.30, gap: 0.009, tw: 29.71, ww: 27.41, lift: 2.30 },
+          { id: 3080, tl: 73.65, wl: 73.64, gap: 0.009, tw: 49.92, ww: 49.89, lift: 0.03 },
+          { id: 3426, tl: 56.34, wl: 56.34, gap: 0.001, tw: 38.80, ww: 34.65, lift: 4.14 },
+          { id: 3862, tl: 37.35, wl: 37.33, gap: 0.015, tw: 29.84, ww: 30.71, lift: -0.87 },
+          { id: 4171, tl: 98.73, wl: 98.77, gap: 0.033, tw: 61.49, ww: 58.90, lift: 2.60 },
+          { id: 4476, tl: 41.84, wl: 41.82, gap: 0.015, tw: 31.80, ww: 31.74, lift: 0.06 },
+          { id: 4683, tl: 29.83, wl: 29.81, gap: 0.021, tw: 27.19, ww: 23.77, lift: 3.42 }
+        ];
+        var pairList = document.getElementById("pairList");
+        var pairDetail = document.getElementById("pairDetail");
+
+        PAIRS.forEach(function (p, i) {
+          var b = document.createElement("button");
+          b.type = "button";
+          b.className = "pair-btn";
+          b.setAttribute("aria-pressed", i === 0 ? "true" : "false");
+          b.innerHTML = '<span class="pb-id">User ' + p.id + '</span>' +
+            '<span class="pb-sub">loyalty ' + p.tl.toFixed(1) + ' · lift ' + (p.lift >= 0 ? "+" : "") + p.lift.toFixed(2) + '</span>';
+          b.addEventListener("click", function () { selectPair(i); });
+          pairList.appendChild(b);
+        });
+
+        function personCard(name, tagClass, tagText, loyalty, watch, color) {
+          var loyW = Math.max(loyalty, 0).toFixed(1);
+          var watchW = (watch / 65 * 100).toFixed(1);
+          return '<div class="person">' +
+            '<div class="who"><span class="name">' + name + '</span><span class="tag ' + tagClass + '">' + tagText + '</span></div>' +
+            '<div class="stat-line"><span class="sl">Loyalty score</span>' +
+            '<div class="mini-track"><div class="mini-fill" style="width:' + loyW + '%;background:' + color + '"></div></div>' +
+            '<span class="sv">' + loyalty.toFixed(2) + '</span></div>' +
+            '<div class="stat-line"><span class="sl">Watch time</span>' +
+            '<div class="mini-track"><div class="mini-fill" style="width:' + watchW + '%;background:' + color + '"></div></div>' +
+            '<span class="sv">' + watch.toFixed(2) + ' hrs</span></div>' +
+            '</div>';
+        }
+
+        function selectPair(i) {
+          var p = PAIRS[i];
+          pairList.querySelectorAll(".pair-btn").forEach(function (b, j) {
+            b.setAttribute("aria-pressed", j === i ? "true" : "false");
+          });
+          var neg = p.lift < 0;
+          pairDetail.innerHTML =
+            personCard("User " + p.id, "tag-treated", "Used feature", p.tl, p.tw, "var(--naive)") +
+            personCard("Twin of user " + p.id, "tag-twin", "Matched control", p.wl, p.ww, "var(--causal)") +
+            '<div class="pair-lift' + (neg ? " neg" : "") + '">' +
+            '<div class="pl-n">' + (p.lift >= 0 ? "+" : "−") + Math.abs(p.lift).toFixed(2) + ' hrs</div>' +
+            '<div class="pl-l">this pair&rsquo;s lift · loyalty gap only ' + p.gap.toFixed(3) + ' points — the difference is the feature, not fandom' +
+            (neg ? '<br />A negative pair is expected: noise moves individual pairs, the average is the estimate.' : '') +
+            '</div></div>';
+        }
+        selectPair(0);
+
+        /* ---------- Pair-lift distribution strip (SVG) ---------- */
+        (function buildDist() {
+          var svg = document.getElementById("distChart");
+          var NS = "http://www.w3.org/2000/svg";
+          var left = 30, right = 610, axisY = 118;
+          var lo = -8, hi = 13;
+          function X(v) { return left + (v - lo) / (hi - lo) * (right - left); }
+          function el(name, attrs) {
+            var e = document.createElementNS(NS, name);
+            for (var k in attrs) e.setAttribute(k, attrs[k]);
+            return e;
+          }
+          // mean ± std band: 1.9065 ± 2.8946
+          svg.appendChild(el("rect", { x: X(-0.9881), y: axisY - 26, width: X(4.8011) - X(-0.9881), height: 52, rx: 8, fill: "var(--causal-soft)" }));
+          var bandLab = el("text", { x: X(-0.9881) - 4, y: axisY - 34, "text-anchor": "end", "font-size": 11 });
+          bandLab.textContent = "mean ± 1 std";
+          svg.appendChild(bandLab);
+          // axis
+          svg.appendChild(el("line", { x1: left, x2: right, y1: axisY, y2: axisY, stroke: "var(--line)", "stroke-width": 2 }));
+          // zero line
+          svg.appendChild(el("line", { x1: X(0), x2: X(0), y1: axisY - 30, y2: axisY + 30, stroke: "var(--ink-2)", "stroke-width": 1, "stroke-dasharray": "3 3" }));
+          var zl = el("text", { x: X(0), y: axisY + 48, "text-anchor": "middle", "font-size": 11 });
+          zl.textContent = "0";
+          svg.appendChild(zl);
+          // sample dots, jittered vertically by index
+          PAIRS.forEach(function (p, i) {
+            var y = axisY - 14 + (i % 3) * 14;
+            svg.appendChild(el("circle", { cx: X(p.lift), cy: y, r: 5, fill: "var(--ink)", opacity: 0.75 }));
+          });
+          var dotsLab = el("text", { x: X(6.96), y: axisY - 40, "text-anchor": "middle", "font-size": 11 });
+          dotsLab.textContent = "the 10 sample pairs";
+          svg.appendChild(dotsLab);
+          svg.appendChild(el("line", { x1: X(6.4), x2: X(6.9), y1: axisY - 36, y2: axisY - 18, stroke: "var(--ink-2)", "stroke-width": 1 }));
+          // mean marker
+          svg.appendChild(el("line", { x1: X(1.9065), x2: X(1.9065), y1: axisY - 44, y2: axisY + 30, stroke: "var(--causal)", "stroke-width": 3 }));
+          var meanLab = el("text", { x: X(1.9065), y: axisY + 48, "text-anchor": "middle", "font-size": 12, "font-weight": 600, fill: "var(--causal)" });
+          meanLab.textContent = "mean 1.91";
+          svg.appendChild(meanLab);
+          svg.appendChild(el("line", { x1: X(1.8175), x2: X(1.8175), y1: axisY - 30, y2: axisY + 30, stroke: "var(--ink-2)", "stroke-width": 1.5 }));
+          var medLab = el("text", { x: X(1.8175) - 44, y: axisY - 52, "text-anchor": "middle", "font-size": 11 });
+          medLab.textContent = "median 1.82";
+          svg.appendChild(medLab);
+          // truth marker
+          svg.appendChild(el("line", { x1: X(2.0), x2: X(2.0), y1: axisY - 44, y2: axisY + 30, stroke: "var(--truth)", "stroke-width": 2, "stroke-dasharray": "5 3" }));
+          var truthLab = el("text", { x: X(2.0) + 56, y: axisY - 52, "text-anchor": "middle", "font-size": 11, fill: "var(--truth)", "font-weight": 600 });
+          truthLab.textContent = "truth 2.00";
+          svg.appendChild(truthLab);
+          // min / max
+          var minLab = el("text", { x: X(-6.75), y: axisY + 48, "text-anchor": "middle", "font-size": 11 });
+          minLab.textContent = "min −6.75";
+          svg.appendChild(minLab);
+          var maxLab = el("text", { x: X(11.89), y: axisY + 48, "text-anchor": "middle", "font-size": 11 });
+          maxLab.textContent = "max 11.89";
+          svg.appendChild(maxLab);
+          svg.appendChild(el("circle", { cx: X(-6.75), cy: axisY, r: 4, fill: "var(--control)" }));
+          svg.appendChild(el("circle", { cx: X(11.89), cy: axisY, r: 4, fill: "var(--control)" }));
+          var cap = el("text", { x: (left + right) / 2, y: 182, "text-anchor": "middle", "font-size": 11.5 });
+          cap.textContent = "pair lift, hours (treated − twin)";
+          svg.appendChild(cap);
+        })();
+
+        /* ---------- Grow the mean watch-time bars ---------- */
+        function growAll() {
+          document.querySelectorAll("section .mean-fill.grow").forEach(function (el) {
+            el.style.width = el.dataset.w + "%";
+          });
+        }
+        if (reduced) { growAll(); }
+        else { requestAnimationFrame(function () { setTimeout(growAll, 60); }); }
+      })();
+    </script>
+  </body>
+</html>
