@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>NeuralStream — Two-Tower Retrieval Demo</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <style>
+      :root {
+        --bg: #f4f2ee;
+        --surface: #ffffff;
+        --surface-2: #ece9e2;
+        --ink: #1a1714;
+        --ink-soft: #5c554c;
+        --line: #d9d3c8;
+        --accent: #c8341f;
+        --accent-soft: #fbe9e4;
+        --gold: #b07d10;
+        --gold-soft: #faf0d7;
+        --good: #1e7a46;
+        --bar-track: #e6e1d8;
+        --shadow: 0 10px 30px rgba(26, 23, 20, 0.08);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root {
+          --bg: #12100e;
+          --surface: #1c1916;
+          --surface-2: #26221e;
+          --ink: #f2ede6;
+          --ink-soft: #a89d8f;
+          --line: #38322b;
+          --accent: #ff5a3c;
+          --accent-soft: #3a1d16;
+          --gold: #e0aa3e;
+          --gold-soft: #33270e;
+          --good: #4cc38a;
+          --bar-track: #2e2924;
+          --shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+        }
+      }
+      * { box-sizing: border-box; }
+      html { scroll-behavior: smooth; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: "Archivo", system-ui, -apple-system, sans-serif;
+        line-height: 1.5;
+        -webkit-font-smoothing: antialiased;
+      }
+      .mono { font-family: "IBM Plex Mono", ui-monospace, monospace; }
+      .wrap { max-width: 1060px; margin: 0 auto; padding: 28px 20px 64px; }
+
+      /* ---------- header ---------- */
+      header { padding: 18px 0 8px; }
+      .kicker {
+        font-family: "IBM Plex Mono", monospace;
+        font-size: 12px; letter-spacing: 0.14em; text-transform: uppercase;
+        color: var(--accent); font-weight: 600;
+      }
+      h1 { font-size: clamp(34px, 6vw, 56px); font-weight: 800; letter-spacing: -0.02em; margin: 8px 0 10px; line-height: 1.05; }
+      .lede { font-size: clamp(16px, 2.4vw, 19px); color: var(--ink-soft); max-width: 640px; margin: 0; }
+      .lede strong { color: var(--ink); }
+
+      /* ---------- stat strip ---------- */
+      .stats {
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+        margin: 26px 0 34px;
+      }
+      .stat {
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 14px 16px;
+      }
+      .stat .num { font-family: "IBM Plex Mono", monospace; font-size: clamp(19px, 3vw, 26px); font-weight: 600; }
+      .stat .lbl { font-size: 12px; color: var(--ink-soft); margin-top: 2px; letter-spacing: 0.02em; }
+      @media (max-width: 640px) { .stats { grid-template-columns: repeat(2, 1fr); } }
+
+      /* ---------- sections ---------- */
+      section { margin: 40px 0; }
+      h2 { font-size: clamp(21px, 3.4vw, 28px); font-weight: 700; letter-spacing: -0.01em; margin: 0 0 6px; }
+      .sub { color: var(--ink-soft); margin: 0 0 18px; max-width: 620px; font-size: 15px; }
+
+      /* ---------- user picker ---------- */
+      .users { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+      @media (max-width: 640px) { .users { grid-template-columns: 1fr; } }
+      .user-card {
+        appearance: none; text-align: left; cursor: pointer;
+        background: var(--surface); color: var(--ink);
+        border: 2px solid var(--line); border-radius: 12px;
+        padding: 18px; font-family: inherit; min-height: 44px;
+        transition: border-color 0.15s ease, transform 0.15s ease;
+      }
+      .user-card:hover { border-color: var(--ink-soft); }
+      .user-card:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+      .user-card[aria-pressed="true"] { border-color: var(--accent); background: var(--accent-soft); }
+      .user-card .uid { font-size: 20px; font-weight: 700; }
+      .user-card .uid span { color: var(--accent); }
+      .user-card .u-meta { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-soft); margin-top: 6px; line-height: 1.7; }
+      .user-card .u-meta b { color: var(--ink); font-weight: 600; }
+
+      /* ---------- pipeline ---------- */
+      .pipe {
+        display: flex; align-items: stretch; gap: 0; margin-top: 22px;
+        overflow: hidden;
+      }
+      .pipe-step {
+        flex: 1; background: var(--surface); border: 1px solid var(--line);
+        padding: 16px 14px; position: relative; opacity: 0.45;
+        transition: opacity 0.3s ease, border-color 0.3s ease, background 0.3s ease;
+      }
+      .pipe-step:first-child { border-radius: 12px 0 0 12px; }
+      .pipe-step:last-child { border-radius: 0 12px 12px 0; }
+      .pipe-step + .pipe-step { border-left: none; }
+      .pipe-step.on { opacity: 1; border-color: var(--accent); background: var(--accent-soft); z-index: 1; }
+      .pipe-step.done { opacity: 1; }
+      .pipe-step .p-tag { font-family: "IBM Plex Mono", monospace; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); font-weight: 600; }
+      .pipe-step .p-name { font-weight: 700; font-size: 16px; margin: 4px 0 4px; }
+      .pipe-step .p-detail { font-size: 12.5px; color: var(--ink-soft); font-family: "IBM Plex Mono", monospace; line-height: 1.6; }
+      .pipe-arrow { align-self: center; padding: 0 2px; color: var(--ink-soft); font-size: 15px; flex: 0 0 auto; }
+      @media (max-width: 760px) {
+        .pipe { flex-direction: column; }
+        .pipe-step:first-child { border-radius: 12px 12px 0 0; }
+        .pipe-step:last-child { border-radius: 0 0 12px 12px; }
+        .pipe-step + .pipe-step { border-left: 1px solid var(--line); border-top: none; }
+        .pipe-arrow { transform: rotate(90deg); padding: 2px 0; align-self: center; }
+      }
+
+      /* vector strip */
+      .vector-box { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+      .vector-box .v-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 6px; }
+      .vector-box .v-title { font-weight: 600; font-size: 14px; }
+      .vector-box .v-note { font-size: 12px; color: var(--ink-soft); }
+      .vector { display: flex; align-items: flex-end; gap: 2px; height: 46px; margin-top: 10px; }
+      .vector i { flex: 1; background: var(--accent); border-radius: 1px 1px 0 0; opacity: 0.25; height: 20%; transition: height 0.5s ease, opacity 0.5s ease; }
+      .vector.live i { opacity: 0.9; }
+
+      /* run button */
+      .run-row { display: flex; align-items: center; gap: 14px; margin-top: 18px; flex-wrap: wrap; }
+      .run-btn {
+        appearance: none; border: none; cursor: pointer;
+        background: var(--accent); color: #fff;
+        font-family: inherit; font-weight: 700; font-size: 16px;
+        padding: 13px 26px; border-radius: 10px; min-height: 48px;
+        transition: transform 0.12s ease, opacity 0.12s ease;
+      }
+      .run-btn:hover { transform: translateY(-1px); }
+      .run-btn:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+      .run-btn:disabled { opacity: 0.55; cursor: default; transform: none; }
+      .run-status { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-soft); }
+
+      /* ---------- results ---------- */
+      .results-head { display: flex; justify-content: space-between; align-items: baseline; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+      .results-head .for-user { font-family: "IBM Plex Mono", monospace; font-size: 13px; color: var(--ink-soft); }
+      .latency-chip {
+        font-family: "IBM Plex Mono", monospace; font-size: 13px;
+        background: var(--surface-2); border: 1px solid var(--line);
+        border-radius: 999px; padding: 6px 12px;
+      }
+      .latency-chip b { color: var(--accent); }
+      ol.top10 { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      .row {
+        display: grid; grid-template-columns: 34px 1fr auto; gap: 6px 14px; align-items: center;
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px;
+        padding: 12px 16px;
+        opacity: 0; transform: translateY(8px);
+      }
+      .row.show { opacity: 1; transform: none; transition: opacity 0.35s ease, transform 0.35s ease; }
+      .row .rank { font-family: "IBM Plex Mono", monospace; font-size: 20px; font-weight: 600; color: var(--ink-soft); text-align: center; }
+      .row.first .rank { color: var(--accent); }
+      .row .title { font-weight: 600; font-size: 15.5px; line-height: 1.35; }
+      .row .score { font-family: "IBM Plex Mono", monospace; font-size: 14px; text-align: right; }
+      .row .score small { display: block; font-size: 10.5px; color: var(--ink-soft); letter-spacing: 0.06em; text-transform: uppercase; }
+      .row .bar-wrap { grid-column: 2 / 4; display: flex; align-items: center; gap: 10px; }
+      .row .bar { flex: 1; height: 7px; background: var(--bar-track); border-radius: 99px; overflow: hidden; }
+      .row .bar i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 99px; transition: width 0.7s ease; }
+      .row .conf { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft); min-width: 86px; }
+      .rated-badge {
+        display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: 0.03em;
+        background: var(--gold-soft); color: var(--gold); border: 1px solid var(--gold);
+        border-radius: 999px; padding: 2px 8px; margin-left: 8px; vertical-align: 2px; white-space: nowrap;
+      }
+      @media (max-width: 520px) {
+        .row { grid-template-columns: 28px 1fr auto; padding: 10px 12px; }
+        .row .conf { min-width: 0; }
+        .rated-badge { margin-left: 0; margin-top: 4px; }
+      }
+
+      /* ---------- facts ---------- */
+      .facts { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 14px; }
+      @media (max-width: 760px) { .facts { grid-template-columns: 1fr; } }
+      .card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); }
+      .card h3 { margin: 0 0 12px; font-size: 16px; font-weight: 700; }
+      .spec { display: grid; grid-template-columns: auto 1fr; gap: 7px 16px; font-size: 14px; }
+      .spec dt { color: var(--ink-soft); font-family: "IBM Plex Mono", monospace; font-size: 12.5px; padding-top: 2px; }
+      .spec dd { margin: 0; font-weight: 600; }
+      .spec dd .mono { font-weight: 500; font-size: 13.5px; }
+      .lat-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .lat-cell { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; }
+      .lat-cell .n { font-family: "IBM Plex Mono", monospace; font-size: 20px; font-weight: 600; }
+      .lat-cell .l { font-size: 11.5px; color: var(--ink-soft); letter-spacing: 0.04em; text-transform: uppercase; margin-top: 2px; }
+      .card .fine { font-size: 12.5px; color: var(--ink-soft); margin: 12px 0 0; }
+
+      /* ---------- diagnosis ---------- */
+      .diagnosis { border: 2px solid var(--gold); background: var(--gold-soft); border-radius: 14px; padding: 24px; }
+      .diagnosis h2 { color: var(--ink); }
+      .diagnosis .big-overlap { display: flex; gap: 22px; align-items: center; flex-wrap: wrap; margin: 16px 0; }
+      .diagnosis .overlap-num { font-family: "IBM Plex Mono", monospace; font-size: 52px; font-weight: 600; line-height: 1; color: var(--gold); }
+      .diagnosis .overlap-txt { max-width: 420px; font-size: 15px; }
+      .diagnosis p { max-width: 720px; }
+      .loss-wrap { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin: 16px 0; }
+      .loss-wrap .lw-title { font-size: 13px; font-weight: 700; margin-bottom: 8px; }
+      .fix {
+        display: flex; gap: 14px; align-items: flex-start;
+        background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-top: 14px;
+      }
+      .fix .fix-tag {
+        flex: 0 0 auto; font-family: "IBM Plex Mono", monospace; font-weight: 600; font-size: 12px;
+        background: var(--good); color: #fff; border-radius: 6px; padding: 4px 9px; margin-top: 2px;
+      }
+      .fix p { margin: 0; font-size: 14.5px; }
+
+      footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--line); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; font-size: 14px; color: var(--ink-soft); }
+      footer a { color: var(--accent); font-weight: 600; text-decoration: none; padding: 8px 0; display: inline-block; }
+      footer a:hover { text-decoration: underline; }
+
+      @media (prefers-reduced-motion: reduce) {
+        html { scroll-behavior: auto; }
+        .row, .row .bar i, .vector i, .pipe-step { transition: none !important; }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <div class="kicker">Interactive demo · Real run, real numbers</div>
+        <h1>NeuralStream</h1>
+        <p class="lede">A <strong>two-tower neural retrieval</strong> system in PyTorch. Pick a user below and watch their embedding get scored against every movie in the catalog — <strong>exact search, no approximation</strong>. Every number on this page comes from an actual training + retrieval run on MovieLens 100K.</p>
+      </header>
+
+      <div class="stats" aria-label="Dataset and index facts">
+        <div class="stat"><div class="num">100,000</div><div class="lbl">ratings · MovieLens 100K</div></div>
+        <div class="stat"><div class="num">55,375</div><div class="lbl">positive pairs (ratings ≥ 4)</div></div>
+        <div class="stat"><div class="num">1,447</div><div class="lbl">movies indexed in FAISS</div></div>
+        <div class="stat"><div class="num">0.1093<span style="font-size:0.6em"> ms</span></div><div class="lbl">mean retrieval latency · CPU</div></div>
+      </div>
+
+      <section aria-labelledby="pick-h">
+        <h2 id="pick-h">1 · Pick a user</h2>
+        <p class="sub">The three most active raters in the dataset. Their top-10 lists below are the model's actual output.</p>
+        <div class="users" role="group" aria-label="Choose a sample user">
+          <button class="user-card" data-user="405" aria-pressed="true">
+            <div class="uid">User <span>405</span></div>
+            <div class="u-meta"><b>737</b> total ratings<br /><b>116</b> rated ≥ 4 stars</div>
+          </button>
+          <button class="user-card" data-user="655" aria-pressed="false">
+            <div class="uid">User <span>655</span></div>
+            <div class="u-meta"><b>685</b> total ratings<br /><b>114</b> rated ≥ 4 stars</div>
+          </button>
+          <button class="user-card" data-user="13" aria-pressed="false">
+            <div class="uid">User <span>13</span></div>
+            <div class="u-meta"><b>636</b> total ratings<br /><b>269</b> rated ≥ 4 stars</div>
+          </button>
+        </div>
+
+        <div class="pipe" aria-label="Retrieval pipeline">
+          <div class="pipe-step" data-step="0">
+            <div class="p-tag">Input</div>
+            <div class="p-name">User ID</div>
+            <div class="p-detail" id="pipe-user">user 405</div>
+          </div>
+          <div class="pipe-arrow" aria-hidden="true">→</div>
+          <div class="pipe-step" data-step="1">
+            <div class="p-tag">User tower</div>
+            <div class="p-name">Neural network</div>
+            <div class="p-detail">Embedding(64)<br />Linear 64→128 · ReLU<br />Linear 128→64</div>
+          </div>
+          <div class="pipe-arrow" aria-hidden="true">→</div>
+          <div class="pipe-step" data-step="2">
+            <div class="p-tag">Embedding</div>
+            <div class="p-name">64-dim vector</div>
+            <div class="p-detail">one point in<br />taste space</div>
+          </div>
+          <div class="pipe-arrow" aria-hidden="true">→</div>
+          <div class="pipe-step" data-step="3">
+            <div class="p-tag">FAISS · IndexFlatIP</div>
+            <div class="p-name">Exact search</div>
+            <div class="p-detail">dot product vs all<br />1,447 item vectors<br />brute force — exact</div>
+          </div>
+          <div class="pipe-arrow" aria-hidden="true">→</div>
+          <div class="pipe-step" data-step="4">
+            <div class="p-tag">Output</div>
+            <div class="p-name">Top 10</div>
+            <div class="p-detail">highest dot-product<br />scores win</div>
+          </div>
+        </div>
+
+        <div class="vector-box">
+          <div class="v-head">
+            <span class="v-title">User embedding — 64 dimensions</span>
+            <span class="v-note">Schematic of the tower's output vector (shape 1 × 64)</span>
+          </div>
+          <div class="vector" id="vector" aria-hidden="true"></div>
+        </div>
+
+        <div class="run-row">
+          <button class="run-btn" id="run-btn">▶ Run retrieval</button>
+          <span class="run-status" id="run-status" role="status">Ready — user 405 selected</span>
+        </div>
+      </section>
+
+      <section aria-labelledby="res-h">
+        <div class="results-head">
+          <h2 id="res-h" style="margin:0">2 · Top 10 recommendations</h2>
+          <span class="for-user" id="for-user">for user 405 · scores are raw dot products</span>
+        </div>
+        <div style="margin-bottom:14px">
+          <span class="latency-chip">measured: <b>0.1093 ms</b> mean · <b>0.1136 ms</b> p95 · 100 runs · CPU</span>
+        </div>
+        <ol class="top10" id="top10"></ol>
+        <p style="font-size:12.5px;color:var(--ink-soft);margin-top:10px">Confidence = the score min-max normalized within this user's top 10 (0–100), exactly as computed in the run. A gold badge marks a movie this user had already rated ≥ 4 in the dataset.</p>
+      </section>
+
+      <section aria-labelledby="facts-h">
+        <h2 id="facts-h">3 · How it was trained</h2>
+        <p class="sub">The item tower mirrors the user tower; training pushes the dot product up for movies a user loved.</p>
+        <div class="facts">
+          <div class="card">
+            <h3>Model &amp; training</h3>
+            <dl class="spec">
+              <dt>architecture</dt><dd>Two-tower · <span class="mono">Embedding(64) → Linear(64→128) → ReLU → Linear(128→64)</span></dd>
+              <dt>score</dt><dd>dot product of user &amp; item vectors</dd>
+              <dt>training data</dt><dd>55,375 pairs — ratings ≥ 4 only, every label = 1</dd>
+              <dt>loss</dt><dd><span class="mono">BCEWithLogitsLoss</span></dd>
+              <dt>optimizer</dt><dd>Adam · lr 0.01 · full batch</dd>
+              <dt>epochs</dt><dd>10</dd>
+              <dt>serving</dt><dd>PyTorch <span class="mono">no_grad</span> lookup + FAISS, CPU</dd>
+            </dl>
+          </div>
+          <div class="card">
+            <h3>Retrieval latency — measured</h3>
+            <div class="lat-grid">
+              <div class="lat-cell"><div class="n">0.1093</div><div class="l">mean · ms</div></div>
+              <div class="lat-cell"><div class="n">0.1136</div><div class="l">p95 · ms</div></div>
+              <div class="lat-cell"><div class="n">0.0607</div><div class="l">p50 · ms</div></div>
+              <div class="lat-cell"><div class="n">100</div><div class="l">runs · 10 warm-up excluded</div></div>
+            </div>
+            <p class="fine">Timed end to end: user-tower embedding lookup + exact inner-product search over all 1,447 indexed items, top-10. CPU only (torch 2.15.0+cpu, faiss-cpu 1.16.0).</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="diagnosis" aria-labelledby="diag-h">
+        <h2 id="diag-h">The honest part: v1 learned popularity, not taste</h2>
+        <div class="big-overlap">
+          <div class="overlap-num">8 / 10</div>
+          <div class="overlap-txt">of the top-10 titles are <strong>the same for all three users</strong> — and <em>Like Water For Chocolate</em> is #1 for every one of them. Different people, same list. That's a bug with a clear cause:</div>
+        </div>
+        <p><strong>Why it happens:</strong> v1 trains on positives only — all 55,375 labels are 1, and the model is never shown a movie a user <em>didn't</em> like. With nothing to push scores down, a few item embeddings grow to dominate for everyone. The training loss tells the story: it collapses to <span class="mono">0.0000</span> by epoch 3 and stays there — the model "solved" the task without learning personalization.</p>
+        <div class="loss-wrap">
+          <div class="lw-title">Training loss by epoch (BCE, printed to 4 decimals by the training script)</div>
+          <svg viewBox="0 0 640 190" width="100%" role="img" aria-label="Line chart of training loss: 0.7208 in epoch 1, 0.0225 in epoch 2, 0.0001 in epoch 3, then 0.0000 for epochs 4 through 10.">
+            <line x1="48" y1="12" x2="48" y2="152" stroke="var(--line)" stroke-width="1" />
+            <line x1="48" y1="152" x2="622" y2="152" stroke="var(--line)" stroke-width="1" />
+            <text x="42" y="26" text-anchor="end" font-size="11" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">0.72</text>
+            <text x="42" y="155" text-anchor="end" font-size="11" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">0</text>
+            <polyline points="70,20 132,145 194,151.9 256,152 318,152 380,152 442,152 504,152 566,152 612,152" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round" />
+            <circle cx="70" cy="20" r="4" fill="var(--accent)" />
+            <circle cx="132" cy="145" r="4" fill="var(--accent)" />
+            <circle cx="194" cy="151.9" r="4" fill="var(--accent)" />
+            <text x="70" y="12" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)" font-family="IBM Plex Mono, monospace">0.7208</text>
+            <text x="132" y="137" text-anchor="middle" font-size="11.5" font-weight="600" fill="var(--ink)" font-family="IBM Plex Mono, monospace">0.0225</text>
+            <text x="205" y="143" font-size="11.5" font-weight="600" fill="var(--ink)" font-family="IBM Plex Mono, monospace">0.0000 from epoch 3 →</text>
+            <text x="70" y="172" text-anchor="middle" font-size="11" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">ep 1</text>
+            <text x="256" y="172" text-anchor="middle" font-size="11" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">ep 4</text>
+            <text x="442" y="172" text-anchor="middle" font-size="11" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">ep 7</text>
+            <text x="612" y="172" text-anchor="middle" font-size="11" fill="var(--ink-soft)" font-family="IBM Plex Mono, monospace">ep 10</text>
+          </svg>
+        </div>
+        <p>Notice user 13: the model even hands back movies they already rated 5 stars (gold badges above) — because with positives-only training, "things this user loved" and "things everyone gets" blur together.</p>
+        <div class="fix">
+          <span class="fix-tag">v2 FIX</span>
+          <p><strong>Negative sampling.</strong> Train on explicit negatives too — movies rated ≤ 2 as label 0, plus sampled unrated items — so the towers must separate "loved" from "not for this user." That breaks the popularity collapse and makes each user's top 10 actually theirs. The retrieval side needs no change: exact search over the retrained embeddings works as-is.</p>
+        </div>
+      </section>
+
+      <footer>
+        <span>NeuralStream · built by Sai Venkata Harshini Rayavarapu · PyTorch + FAISS</span>
+        <a href="https://github.com/Hercodes-ux/Two-Tower-Neural-Retrieval-and-Ranking-System" target="_blank" rel="noopener">View the code on GitHub →</a>
+      </footer>
+    </div>
+
+    <script>
+      var DATA = {
+        "405": { total: 737, ge4: 116, top10: [
+          { rank: 1, title: "Like Water For Chocolate (Como agua para chocolate) (1992)", score: 108.5046, conf: 100.0, rated: null },
+          { rank: 2, title: "Ponette (1996)", score: 104.6052, conf: 56.33, rated: null },
+          { rank: 3, title: "For Whom the Bell Tolls (1943)", score: 103.971, conf: 49.22, rated: null },
+          { rank: 4, title: "Three Musketeers, The (1993)", score: 101.7758, conf: 24.64, rated: null },
+          { rank: 5, title: "Independence Day (ID4) (1996)", score: 101.3916, conf: 20.33, rated: null },
+          { rank: 6, title: "Air Up There, The (1994)", score: 101.0157, conf: 16.12, rated: null },
+          { rank: 7, title: "Judgment Night (1993)", score: 100.386, conf: 9.07, rated: null },
+          { rank: 8, title: "Thin Line Between Love and Hate, A (1996)", score: 100.3378, conf: 8.53, rated: null },
+          { rank: 9, title: "Man Who Would Be King, The (1975)", score: 99.8139, conf: 2.66, rated: null },
+          { rank: 10, title: "Old Man and the Sea, The (1958)", score: 99.5762, conf: 0.0, rated: null }
+        ]},
+        "655": { total: 685, ge4: 114, top10: [
+          { rank: 1, title: "Like Water For Chocolate (Como agua para chocolate) (1992)", score: 114.8245, conf: 100.0, rated: null },
+          { rank: 2, title: "Ponette (1996)", score: 111.3238, conf: 61.77, rated: null },
+          { rank: 3, title: "For Whom the Bell Tolls (1943)", score: 111.2353, conf: 60.8, rated: null },
+          { rank: 4, title: "Three Musketeers, The (1993)", score: 108.9467, conf: 35.81, rated: null },
+          { rank: 5, title: "Air Up There, The (1994)", score: 107.6282, conf: 21.41, rated: null },
+          { rank: 6, title: "Independence Day (ID4) (1996)", score: 106.9193, conf: 13.67, rated: null },
+          { rank: 7, title: "Judgment Night (1993)", score: 106.4477, conf: 8.52, rated: null },
+          { rank: 8, title: "Howling, The (1981)", score: 106.4197, conf: 8.21, rated: null },
+          { rank: 9, title: "Old Man and the Sea, The (1958)", score: 106.1028, conf: 4.75, rated: null },
+          { rank: 10, title: "Thin Line Between Love and Hate, A (1996)", score: 105.6676, conf: 0.0, rated: null }
+        ]},
+        "13": { total: 636, ge4: 269, top10: [
+          { rank: 1, title: "Like Water For Chocolate (Como agua para chocolate) (1992)", score: 109.872, conf: 100.0, rated: 5 },
+          { rank: 2, title: "For Whom the Bell Tolls (1943)", score: 107.4654, conf: 71.77, rated: 4 },
+          { rank: 3, title: "Ponette (1996)", score: 106.3246, conf: 58.4, rated: null },
+          { rank: 4, title: "Three Musketeers, The (1993)", score: 103.7556, conf: 28.27, rated: null },
+          { rank: 5, title: "Independence Day (ID4) (1996)", score: 103.2178, conf: 21.96, rated: 5 },
+          { rank: 6, title: "Air Up There, The (1994)", score: 102.3656, conf: 11.96, rated: null },
+          { rank: 7, title: "Thin Line Between Love and Hate, A (1996)", score: 101.5685, conf: 2.62, rated: null },
+          { rank: 8, title: "Howling, The (1981)", score: 101.505, conf: 1.87, rated: null },
+          { rank: 9, title: "Man Who Would Be King, The (1975)", score: 101.4455, conf: 1.17, rated: 5 },
+          { rank: 10, title: "Old Man and the Sea, The (1958)", score: 101.3455, conf: 0.0, rated: null }
+        ]}
+      };
+
+      var currentUser = "405";
+      var running = false;
+      var reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      var cards = document.querySelectorAll(".user-card");
+      var steps = document.querySelectorAll(".pipe-step");
+      var top10El = document.getElementById("top10");
+      var statusEl = document.getElementById("run-status");
+      var runBtn = document.getElementById("run-btn");
+      var vectorEl = document.getElementById("vector");
+
+      // Build the 64-bar schematic vector. Heights are a fixed decorative
+      // pattern (seeded per user) — the strip illustrates the vector's shape.
+      function drawVector(seed) {
+        vectorEl.innerHTML = "";
+        var x = seed * 7919 + 13;
+        for (var i = 0; i < 64; i++) {
+          x = (x * 1103515245 + 12345) % 2147483648;
+          var h = 18 + (x % 82);
+          var bar = document.createElement("i");
+          bar.style.height = h + "%";
+          bar.dataset.h = h;
+          vectorEl.appendChild(bar);
+        }
+      }
+
+      function renderResults(uid, animate) {
+        var d = DATA[uid];
+        document.getElementById("for-user").textContent =
+          "for user " + uid + " · " + d.total + " ratings in dataset · scores are raw dot products";
+        top10El.innerHTML = "";
+        d.top10.forEach(function (m, idx) {
+          var li = document.createElement("li");
+          li.className = "row" + (m.rank === 1 ? " first" : "");
+          var badge = m.rated ? '<span class="rated-badge">already rated ' + m.rated + '★ by user ' + uid + "</span>" : "";
+          li.innerHTML =
+            '<div class="rank">' + m.rank + "</div>" +
+            '<div class="title">' + m.title + badge + "</div>" +
+            '<div class="score">' + m.score.toFixed(2) + "<small>dot product</small></div>" +
+            '<div class="bar-wrap"><div class="bar"><i data-w="' + m.conf + '"></i></div>' +
+            '<span class="conf">confidence ' + m.conf.toFixed(1) + "</span></div>";
+          top10El.appendChild(li);
+          var delay = animate && !reduced ? idx * 70 : 0;
+          setTimeout(function () {
+            li.classList.add("show");
+            li.querySelector(".bar i").style.width = m.conf + "%";
+          }, delay + 30);
+        });
+      }
+
+      function setStep(n, cls) {
+        steps.forEach(function (s, i) {
+          s.classList.remove("on", "done");
+          if (i < n) s.classList.add("done");
+          if (i === n) s.classList.add(cls);
+        });
+      }
+
+      function runRetrieval() {
+        if (running) return;
+        running = true;
+        runBtn.disabled = true;
+        document.getElementById("pipe-user").textContent = "user " + currentUser;
+        var msgs = [
+          "Embedding user " + currentUser + "…",
+          "Running user tower (64 → 128 → 64)…",
+          "64-dim embedding ready",
+          "Exact inner-product search over 1,447 movies…",
+          "Top 10 ready — measured mean 0.1093 ms"
+        ];
+        if (reduced) {
+          setStep(5, "done");
+          steps.forEach(function (s) { s.classList.add("done"); s.classList.remove("on"); });
+          vectorEl.classList.add("live");
+          renderResults(currentUser, false);
+          statusEl.textContent = msgs[4];
+          running = false;
+          runBtn.disabled = false;
+          return;
+        }
+        var i = 0;
+        vectorEl.classList.remove("live");
+        renderResults(currentUser, false);
+        top10El.style.visibility = "hidden";
+        function tick() {
+          if (i < steps.length) {
+            setStep(i, "on");
+            statusEl.textContent = msgs[i];
+            if (i === 2) vectorEl.classList.add("live");
+            i++;
+            setTimeout(tick, 420);
+          } else {
+            steps.forEach(function (s) { s.classList.add("done"); s.classList.remove("on"); });
+            statusEl.textContent = msgs[4];
+            top10El.style.visibility = "visible";
+            renderResults(currentUser, true);
+            running = false;
+            runBtn.disabled = false;
+          }
+        }
+        tick();
+      }
+
+      cards.forEach(function (card) {
+        card.addEventListener("click", function () {
+          cards.forEach(function (c) { c.setAttribute("aria-pressed", "false"); });
+          card.setAttribute("aria-pressed", "true");
+          currentUser = card.getAttribute("data-user");
+          document.getElementById("pipe-user").textContent = "user " + currentUser;
+          statusEl.textContent = "Ready — user " + currentUser + " selected";
+          steps.forEach(function (s) { s.classList.remove("on", "done"); });
+          drawVector(parseInt(currentUser, 10));
+          vectorEl.classList.remove("live");
+          renderResults(currentUser, false);
+        });
+      });
+
+      runBtn.addEventListener("click", runRetrieval);
+
+      // Initial state: user 405 results shown immediately.
+      drawVector(405);
+      renderResults("405", false);
+    </script>
+  </body>
+</html>
